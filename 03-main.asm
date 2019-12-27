@@ -40,5 +40,23 @@ kq_found:
     add hl, hl                  ; x16
     ld de, (kqf_tbase)          ; put base address in de
     add hl, de                  ; add base address to calculated offset
-    ??
-
+    ;
+    ; get the queue location and store it in a variable
+    ; get the producer function id and store in a variable
+    ; get the consumer function id and store in a variable
+    ;
+    ; load the producer function record by id
+    ; get the sp and store in a variable
+    ; get the heap base and store in a variable
+    ; switch the sp in, push return address on stack
+    ; JP to function
+    ; restore the kernel sp
+    ;
+    ; load the consumer function record by id
+    ; get the sp and store in a variable
+    ; get the heap base and store in a variable
+    ; switch the sp in, push return address on stack
+    ; JP to function
+    ; restore the kernel sp
+    ;
+    ; goto kq_main_loop
