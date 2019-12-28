@@ -4,6 +4,7 @@ SRCS =
 SRCS += 00-variables.asm
 SRCS += 01-interrupts.asm
 SRCS += 02-init.asm
+SRCS += 03-main.asm
 
 MAIN = oz-rc2014.bin
 ROM_SIZE = 8192

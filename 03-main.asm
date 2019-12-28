@@ -1,18 +1,14 @@
-kq_curr_id: equ 0x00
-kq_tbase: equ 0x00
-kq_tab_max: 0x00
-kqf_tbase: equ 0x00
-
 kq_init:
     ld a, 0x00                  ; zero a
     ld (kq_curr_id), a          ; save it as the current queue id
 kq_main_loop:
+    ld a, (kq_curr_id)          ; load the current queue id into a
     ld h, 0x00                  ; zero h
     ld l, a                     ; copy current queue id to l
-    ld de, (kq_tbase)           ; load the base address of table from variable
+    ld de, kqs_tbase            ; load the base address of table from variable
     add hl, de                  ; add base address to index
     ld e, a                     ; copy current queue id to temp variable
-    ld a, (kq_tab_max)          ; load the table length from variable
+    ld a, kqs_tmax              ; load the table length from variable
     ld b, a                     ; set counter to table length
     sub e                       ; a now contains the max id - id
     ld d, a                     ; load passes until a loop around
@@ -21,7 +17,7 @@ kq_next_id:
     inc e                       ; increment the new id stored
     dec d                       ; decrement loop var
     jp nz, kq_no_reset          ; if loop var is not zero skip resetting de
-    ld de, (kq_tbase)           ; cycle de back to beginning of table
+    ld de, kqs_tbase            ; cycle de back to beginning of table
     ld e, 0x00                  ; cycle new id back around
 kq_no_reset:
     ld a, (hl)                  ; load byte to prepare to test it
@@ -33,30 +29,53 @@ kq_found:
     ld a, e                     ; get new found id
     ld (kq_curr_id), a          ; save it
     ld h, 0x00                  ; zero h
-    ld l, a                     ; copy current tid to l
+    ld l, a                     ; copy queue id to l
     add hl, hl                  ; x2
     add hl, hl                  ; x4
-    add hl, hl                  ; x8
-    add hl, hl                  ; x16
-    ld de, (kqf_tbase)          ; put base address in de
+    ld de, kq_tbase             ; put base address in de
     add hl, de                  ; add base address to calculated offset
-    ;
-    ; get the queue location and store it in a variable
-    ; get the producer function id and store in a variable
-    ; get the consumer function id and store in a variable
-    ;
-    ; load the producer function record by id
-    ; get the sp and store in a variable
-    ; get the heap base and store in a variable
-    ; switch the sp in, push return address on stack
-    ; JP to function
-    ; restore the kernel sp
-    ;
-    ; load the consumer function record by id
-    ; get the sp and store in a variable
-    ; get the heap base and store in a variable
-    ; switch the sp in, push return address on stack
-    ; JP to function
-    ; restore the kernel sp
-    ;
-    ; goto kq_main_loop
+    ld de, kq_addr              ; set block copy destination address
+    ldi                         ; low byte of queue address
+    ldi                         ; high byte of queue address
+    ldi                         ; producer id
+    ldi                         ; consumer id
+kq_run_prod:
+    ld a, (kq_prod_id)          ; load the producer id
+    ld h, 0x00                  ; zero h
+    ld l, a                     ; copy function id to l
+    add hl, hl                  ; x2
+    add hl, hl                  ; x4
+    ld de, kfn_tbase            ; put base address in de
+    add hl, de                  ; add base address to calculated offset
+    ld de, kfn_addr             ; set block copy destination address
+    ldi                         ; low byte of function address
+    ldi                         ; high byte of function address
+    ldi                         ; low byte of stack pointer
+    ldi                         ; high byte of stack pointer
+    ld bc, kq_run_cons          ; put return address in bc
+    ld hl, (kfn_addr)           ; load the function address into hl
+    ld sp, (kfn_sp)             ; set stack pointer
+    push bc                     ; push return address on function stack
+    jp (hl)                     ; jump to the function
+    ld sp, (k_sp_kernel)        ; restore the kernel stack pointer
+kq_run_cons:
+    ld a, (kq_cons_id)          ; load the consumer id
+    ld h, 0x00                  ; zero h
+    ld l, a                     ; copy function id to l
+    add hl, hl                  ; x2
+    add hl, hl                  ; x4
+    ld de, kfn_tbase            ; put base address in de
+    add hl, de                  ; add base address to calculated offset
+    ld de, kfn_addr             ; set block copy destination address
+    ldi                         ; low byte of function address
+    ldi                         ; high byte of function address
+    ldi                         ; low byte of stack pointer
+    ldi                         ; high byte of stack pointer
+    ld bc, kq_end_loop          ; put return address in bc
+    ld hl, (kfn_addr)           ; load the function address into hl
+    ld sp, (kfn_sp)             ; set stack pointer
+    push bc                     ; push return address on function stack
+    jp (hl)                     ; jump to the function
+    ld sp, (k_sp_kernel)        ; restore the kernel stack pointer
+kq_end_loop:
+    jp kq_main_loop

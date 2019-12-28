@@ -8,7 +8,7 @@ k_rst00:
 
 k_rst08:
     di
-    jp k_int_switch ; k_int_syscall
+    jp k_int_reti
     nop
     nop
     nop
@@ -138,36 +138,4 @@ k_serial_read:
     out (sioa_d), a             ; echo the character
     jp k_serial_read            ; continue to read until empty
 k_serial_read_end:
-    ret
-
-k_int_switch:
-    ld (k_sp_tid), sp           ; save the current thread sp
-    ld sp, (k_sp_kernel)        ; load the kernel sp
-    push iy                     ; save all registers on the kernel stack
-    push ix
-    push hl
-    push de
-    push bc
-    push af
-    call k_proc_switch          ; do a task switch
-    pop af                      ; restore registers from kernel stack
-    pop bc
-    pop de
-    pop hl
-    pop ix
-    pop iy
-    ld (k_sp_kernel), sp        ; save the kernel sp
-    ld sp, (k_sp_tid)           ; load the current thread sp
-    jp k_int_reti               ; jump to return
-
-k_proc_switch:
-    in a, (sioa_c)
-    bit 0, a
-    jr z, k_proc_no_char
-    in a, (sioa_d)
-    nop
-    nop
-    nop
-    out (sioa_d), a
-k_proc_no_char:
     ret
