@@ -42,6 +42,7 @@ kq_found:
     ldi                         ; consumer id
     ldi                         ; write pointer idx
     ldi                         ; read pointer idx
+    ldi                         ; size mask
 kq_run_prod:
     ld a, (kq_prod_id)          ; load the producer id
     ld h, 0x00                  ; zero h

@@ -17,6 +17,7 @@
 ;   | kq_cons_id  | working queue consumer id            |
 ;   | kq_pwrite   | working queue write index            |
 ;   | kq_pread    | working queue read index             |
+;   | kq_mask     | working queue size mask              |
 ;   |-------------+--------------------------------------|
 ;   | kfn_sp      | start of the working function record |
 ;   |             | and function stack top               |
@@ -44,18 +45,19 @@ kqs_tmax:       equ 0x00ff                  ; maximum number of queues
 ; kernel variables
 k_sp_kernel:    equ k_rs + 0x00             ; stores stack pointer of the kernel
 kq_curr_id:     equ k_sp_kernel + 0x02      ; current working queue id
-kq_addr:        equ kq_curr_id + 0x01       ; location of the working queue record
-kq_prod_id:     equ kq_addr + 0x02          ; location of the working queue producer id
-kq_cons_id:     equ kq_prod_id + 0x01       ; location of the working queue consumer id
-kq_pwrite:      equ kq_cons_id + 0x01       ; location of the working queue write index
-kq_pread:       equ kq_pwrite + 0x01        ; location of the working queue read index
-kfn_sp:         equ kq_pread + 0x01         ; location of the working function record
-kfn_addr:       equ kfn_sp + 0x02           ; location of the working function address
+kq_addr:        equ kq_curr_id + 0x01       ; working queue record
+kq_prod_id:     equ kq_addr + 0x02          ; working queue producer id
+kq_cons_id:     equ kq_prod_id + 0x01       ; working queue consumer id
+kq_pwrite:      equ kq_cons_id + 0x01       ; working queue write index
+kq_pread:       equ kq_pwrite + 0x01        ; working queue read index
+kq_mask:        equ kq_pread + 0x01         ; working queue size mask
+kfn_sp:         equ kq_pread + 0x01         ; working function record
+kfn_addr:       equ kfn_sp + 0x02           ; working function address
 
 ; constants
 kqs_tbase:      equ kfn_addr + 0x02         ; location of the queue status table
 kq_tbase:       equ kqs_tbase + kqs_tmax    ; location of the queue record table
-kfn_tbase:      equ kq_tbase + (kqs_tmax * 0x04)    ; location of the working function table
+kfn_tbase:      equ kq_tbase + (kqs_tmax * 0x08)    ; location of the working function table
 
 ; Serial buffer variables
 k_serbuf_write: equ 0x0000      ; location of serial buffer write pointer
