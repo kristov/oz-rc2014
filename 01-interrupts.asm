@@ -139,3 +139,25 @@ k_serial_read:
     jp k_serial_read            ; continue to read until empty
 k_serial_read_end:
     ret
+
+k_syscall:
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
+    add hl, sp                  ; skip over return address on stack
+    ld a, (hl)                  ; copy the single byte argument to a
+    add a, a                    ; multiply syscall id by 2
+    ld h, 0x00                  ; clear high byte of hl
+    ld l, a                     ; set lower byte to idx * 2
+    ld de, k_syscall_tbase      ; load base of the jump table
+    add hl, de                  ; hl is now the location of the sub address in the table
+    ld a, (hl)                  ; load first byte of address into a
+    inc hl                      ; move to second byte of word
+    ld h, (hl)                  ; load second byte into upper byte of hl
+    ld l, a                     ; load first byte into lower byte of hl
+    ld bc, k_int_reti           ; load return address from call
+    jp (hl)                     ; jump to that address
+
+k_syscall_tbase:
+    dw k_syscall_nop
+    dw rb_writeb
+    dw rb_readb
+
