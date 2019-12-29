@@ -15,6 +15,8 @@
 ;   |             | and working queue address            |
 ;   | kq_prod_id  | working queue producer id            |
 ;   | kq_cons_id  | working queue consumer id            |
+;   | kq_pwrite   | working queue write index            |
+;   | kq_pread    | working queue read index             |
 ;   |-------------+--------------------------------------|
 ;   | kfn_sp      | start of the working function record |
 ;   |             | and function stack top               |
@@ -45,7 +47,9 @@ kq_curr_id:     equ k_sp_kernel + 0x02      ; current working queue id
 kq_addr:        equ kq_curr_id + 0x01       ; location of the working queue record
 kq_prod_id:     equ kq_addr + 0x02          ; location of the working queue producer id
 kq_cons_id:     equ kq_prod_id + 0x01       ; location of the working queue consumer id
-kfn_sp:         equ kq_cons_id + 0x01       ; location of the working function record
+kq_pwrite:      equ kq_cons_id + 0x01       ; location of the working queue write index
+kq_pread:       equ kq_pwrite + 0x01        ; location of the working queue read index
+kfn_sp:         equ kq_pread + 0x01         ; location of the working function record
 kfn_addr:       equ kfn_sp + 0x02           ; location of the working function address
 
 ; constants

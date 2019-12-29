@@ -32,6 +32,7 @@ kq_found:
     ld l, a                     ; copy queue id to l
     add hl, hl                  ; x2
     add hl, hl                  ; x4
+    add hl, hl                  ; x8
     ld de, kq_tbase             ; put base address in de
     add hl, de                  ; add base address to calculated offset
     ld de, kq_addr              ; set block copy destination address
@@ -39,6 +40,8 @@ kq_found:
     ldi                         ; high byte of queue address
     ldi                         ; producer id
     ldi                         ; consumer id
+    ldi                         ; write pointer idx
+    ldi                         ; read pointer idx
 kq_run_prod:
     ld a, (kq_prod_id)          ; load the producer id
     ld h, 0x00                  ; zero h
