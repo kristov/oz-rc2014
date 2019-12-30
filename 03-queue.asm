@@ -66,7 +66,6 @@ kq_run_prod:
     ld sp, (kfn_sp)             ; set stack pointer
     push bc                     ; push return address on function stack
     jp (hl)                     ; jump to the function
-    ld sp, (k_sp_kernel)        ; restore the kernel stack pointer
 kq_run_cons:
     ld a, (kq_cons_id)          ; load the consumer id
     ld h, 0x00                  ; zero h
@@ -85,12 +84,31 @@ kq_run_cons:
     ld sp, (kfn_sp)             ; set stack pointer
     push bc                     ; push return address on function stack
     jp (hl)                     ; jump to the function
-    ld sp, (k_sp_kernel)        ; restore the kernel stack pointer
 kq_check_flag_ei:
+    ld sp, (k_sp_kernel)        ; restore the kernel stack pointer
     ld a, (kq_flags)            ; load flags
     bit 0, a                    ; test interrupt disable flag
-    jp z, kq_run_prod           ; skip ei if not enabled
+    jp z, kq_save_q             ; skip ei if not enabled
     ei                          ; enable interrupts
+kq_save_q:
+    ld a, (kq_curr_id)          ; load current queue id
+    ld h, 0x00                  ; zero h
+    ld l, a                     ; copy queue id to l
+    add hl, hl                  ; x2
+    add hl, hl                  ; x4
+    add hl, hl                  ; x8
+    ld de, kq_tbase             ; put base address in de
+    add hl, de                  ; add base address to calculated offset
+    ex de, hl                   ; swap the usual destination
+    ld hl, kq_addr              ; set block copy destination address
+    ldi                         ; low byte of queue address
+    ldi                         ; high byte of queue address
+    ldi                         ; producer id
+    ldi                         ; consumer id
+    ldi                         ; write pointer idx
+    ldi                         ; read pointer idx
+    ldi                         ; size mask
+    ldi                         ; flags
     jp kq_main_loop
 
 ; Returns the memory address of the kq_tbase queue entry for the provided
