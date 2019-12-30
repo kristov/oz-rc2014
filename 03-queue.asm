@@ -1,6 +1,6 @@
 ; Queue main loop function. It is expected that this function never ends.
 ;
-kq_main_loop:
+kq_main_loop_COMPLEX:
     ld a, (kq_curr_id)          ; load the current queue id into a
     ld h, 0x00                  ; zero h
     ld l, a                     ; copy current queue id to l
@@ -27,6 +27,46 @@ kq_no_reset:
 kq_found:
     ld a, e                     ; get new found id
     ld (kq_curr_id), a          ; save it
+    push af                     ; prepare to call kq_load_q
+    call kq_load_q              ; load the queue record into working space
+    pop af                      ; discard af from stack
+    ld a, (kq_prod_id)          ; load the producer id
+    push af                     ; prepare to call kq_load_func
+    call kq_load_func           ; load the producer into working space
+    pop af                      ; discard af from stack
+    call kq_run_func            ; run the current function
+    ld a, (kq_cons_id)          ; load the consumer id
+    push af                     ; prepare to call kq_load_func
+    call kq_load_func           ; load the consumer into working space
+    pop af                      ; discard af from stack
+    call kq_run_func            ; run the current function
+    ld a, (kq_curr_id)          ; prepare to save the queue state
+    push af                     ; push current queue id onto stack
+    call kq_save_q              ; save the queue back to table
+    pop af                      ; discard af from stack
+    jp kq_main_loop
+
+; Test loop assuming the current queue is never switched
+;
+kq_main_loop:
+    ld a, (kq_prod_id)          ; load the producer id
+    push af                     ; prepare to call kq_load_func
+    call kq_load_func           ; load the producer into working space
+    pop af                      ; discard af from stack
+    call kq_run_func            ; run the current function
+    ld a, (kq_cons_id)          ; load the consumer id
+    push af                     ; prepare to call kq_load_func
+    call kq_load_func           ; load the consumer into working space
+    pop af                      ; discard af from stack
+    call kq_run_func            ; run the current function
+    jp kq_main_loop
+
+; Load a queue from the queue table into working space
+;
+kq_load_q:
+    ld hl, 0x0002               ; extract argument 2 from stack
+    add hl, sp                  ; skip over return address on stack
+    ld a, (hl)                  ; copy the single byte argument to a
     ld h, 0x00                  ; zero h
     ld l, a                     ; copy queue id to l
     add hl, hl                  ; x2
@@ -43,55 +83,85 @@ kq_found:
     ldi                         ; read pointer idx
     ldi                         ; size mask
     ldi                         ; flags
-kq_check_flag_di:
-    ld a, (kq_flags)            ; load flags
-    bit 0, a                    ; test interrupt disable flag
-    jp z, kq_run_prod           ; skip di if not enabled
-    di                          ; disable interrupts
-kq_run_prod:
-    ld a, (kq_prod_id)          ; load the producer id
+    ret
+
+; Load a function into the function record
+;
+kq_load_func:
+    ld hl, 0x0002               ; extract argument 2 from stack
+    add hl, sp                  ; skip over return address on stack
+    ld a, (hl)                  ; copy the single byte argument to a
     ld h, 0x00                  ; zero h
     ld l, a                     ; copy function id to l
     add hl, hl                  ; x2
     add hl, hl                  ; x4
     ld de, kfn_tbase            ; put base address in de
     add hl, de                  ; add base address to calculated offset
-    ld de, kfn_addr             ; set block copy destination address
+    ld de, kfn_sp               ; set block copy destination address
     ldi                         ; low byte of function address
     ldi                         ; high byte of function address
     ldi                         ; low byte of stack pointer
     ldi                         ; high byte of stack pointer
-    ld bc, kq_run_cons          ; put return address in bc
-    ld hl, (kfn_addr)           ; load the function address into hl
-    ld sp, (kfn_sp)             ; set stack pointer
-    push bc                     ; push return address on function stack
-    jp (hl)                     ; jump to the function
-kq_run_cons:
-    ld a, (kq_cons_id)          ; load the consumer id
+    ret
+
+; Save a function into the function table
+;
+kq_save_func:
+    ld hl, 0x0002               ; extract argument 2 from stack
+    add hl, sp                  ; skip over return address on stack
+    ld a, (hl)                  ; copy the single byte argument to a
     ld h, 0x00                  ; zero h
     ld l, a                     ; copy function id to l
     add hl, hl                  ; x2
     add hl, hl                  ; x4
     ld de, kfn_tbase            ; put base address in de
     add hl, de                  ; add base address to calculated offset
-    ld de, kfn_addr             ; set block copy destination address
+    ex de, hl                   ; exchange
+    ld hl, kfn_sp               ; set block copy source address
     ldi                         ; low byte of function address
     ldi                         ; high byte of function address
     ldi                         ; low byte of stack pointer
     ldi                         ; high byte of stack pointer
-    ld bc, kq_check_flag_ei     ; put return address in bc
+    ret
+
+; Run the loaded function
+;
+kq_run_func:
+    ld bc, kq_run_func_ret      ; put return address in bc
     ld hl, (kfn_addr)           ; load the function address into hl
     ld sp, (kfn_sp)             ; set stack pointer
     push bc                     ; push return address on function stack
     jp (hl)                     ; jump to the function
-kq_check_flag_ei:
+kq_run_func_ret:
+    ret
+
+; Check the interrupt disable flag and enable it
+;
+kq_cflag_ei:
     ld sp, (k_sp_kernel)        ; restore the kernel stack pointer
     ld a, (kq_flags)            ; load flags
     bit 0, a                    ; test interrupt disable flag
-    jp z, kq_save_q             ; skip ei if not enabled
+    jp z, kq_cflag_ei_ret       ; skip ei if not enabled
     ei                          ; enable interrupts
+kq_cflag_ei_ret:
+    ret
+
+; Check the interrupt disable flag and disable it
+;
+kq_cflag_di:
+    ld a, (kq_flags)            ; load flags
+    bit 0, a                    ; test interrupt disable flag
+    jp z, kq_cflag_di_ret       ; skip di if not enabled
+    di                          ; disable interrupts
+kq_cflag_di_ret:
+    ret
+
+; Save the loaded queue back into the queue table
+;
 kq_save_q:
-    ld a, (kq_curr_id)          ; load current queue id
+    ld hl, 0x0002               ; extract argument 2 from stack
+    add hl, sp                  ; skip over return address on stack
+    ld a, (hl)                  ; copy the single byte argument to a
     ld h, 0x00                  ; zero h
     ld l, a                     ; copy queue id to l
     add hl, hl                  ; x2
@@ -109,7 +179,7 @@ kq_save_q:
     ldi                         ; read pointer idx
     ldi                         ; size mask
     ldi                         ; flags
-    jp kq_main_loop
+    ret
 
 ; Returns the memory address of the kq_tbase queue entry for the provided
 ; index.
@@ -117,7 +187,7 @@ kq_save_q:
 kq_addr_by_idx:
     ld hl, 0x0002               ; extract argument 2 from stack
     add hl, sp                  ; skip over return address on stack
-    ld a, (hl)                  ; copy the single byte argument to c
+    ld a, (hl)                  ; copy the single byte argument to a
     ld h, 0x00                  ; zero h
     ld l, a                     ; copy queue id to l
     add hl, hl                  ; x2
@@ -133,7 +203,7 @@ kq_addr_by_idx:
 kfn_addr_by_idx:
     ld hl, 0x0002               ; extract argument 2 from stack
     add hl, sp                  ; skip over return address on stack
-    ld a, (hl)                  ; copy the single byte argument to c
+    ld a, (hl)                  ; copy the single byte argument to a
     ld h, 0x00                  ; zero h
     ld l, a                     ; copy queue id to l
     add hl, hl                  ; x2
