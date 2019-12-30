@@ -65,7 +65,7 @@ k_rst38:
 ; Table of kernel syscall functions
 ;
 k_syscall_tbase:
-    dw k_syscall_nop            ; a no operation syscall id 0
+    dw k_syscall_noop           ; a no operation syscall id 0
     dw rb_writeb
     dw rb_readb
 
