@@ -43,6 +43,12 @@ kq_found:
     ldi                         ; write pointer idx
     ldi                         ; read pointer idx
     ldi                         ; size mask
+    ldi                         ; flags
+kq_check_flag_di:
+    ld a, (kq_flags)            ; load flags
+    bit 0, a                    ; test interrupt disable flag
+    jp z, kq_run_prod           ; skip di if not enabled
+    di                          ; disable interrupts
 kq_run_prod:
     ld a, (kq_prod_id)          ; load the producer id
     ld h, 0x00                  ; zero h
@@ -75,11 +81,15 @@ kq_run_cons:
     ldi                         ; high byte of function address
     ldi                         ; low byte of stack pointer
     ldi                         ; high byte of stack pointer
-    ld bc, kq_end_loop          ; put return address in bc
+    ld bc, kq_check_flag_ei     ; put return address in bc
     ld hl, (kfn_addr)           ; load the function address into hl
     ld sp, (kfn_sp)             ; set stack pointer
     push bc                     ; push return address on function stack
     jp (hl)                     ; jump to the function
     ld sp, (k_sp_kernel)        ; restore the kernel stack pointer
-kq_end_loop:
+kq_check_flag_ei:
+    ld a, (kq_flags)            ; load flags
+    bit 0, a                    ; test interrupt disable flag
+    jp z, kq_run_prod           ; skip ei if not enabled
+    ei                          ; enable interrupts
     jp kq_main_loop

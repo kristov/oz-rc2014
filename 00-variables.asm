@@ -18,6 +18,7 @@
 ;   | kq_pwrite   | working queue write index            |
 ;   | kq_pread    | working queue read index             |
 ;   | kq_mask     | working queue size mask              |
+;   | kq_flags    | working queue flags                  |
 ;   |-------------+--------------------------------------|
 ;   | kfn_sp      | start of the working function record |
 ;   |             | and function stack top               |
@@ -51,7 +52,8 @@ kq_cons_id:     equ kq_prod_id + 0x01       ; working queue consumer id
 kq_pwrite:      equ kq_cons_id + 0x01       ; working queue write index
 kq_pread:       equ kq_pwrite + 0x01        ; working queue read index
 kq_mask:        equ kq_pread + 0x01         ; working queue size mask
-kfn_sp:         equ kq_pread + 0x01         ; working function record
+kq_flags:       equ kq_mask + 0x01          ; working queue flags
+kfn_sp:         equ kq_flags + 0x01         ; working function record
 kfn_addr:       equ kfn_sp + 0x02           ; working function address
 
 ; constants
