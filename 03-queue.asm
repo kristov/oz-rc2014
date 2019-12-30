@@ -1,6 +1,5 @@
-kq_init:
-    ld a, 0x00                  ; zero a
-    ld (kq_curr_id), a          ; save it as the current queue id
+; Queue main loop function. It is expected that this function never ends.
+;
 kq_main_loop:
     ld a, (kq_curr_id)          ; load the current queue id into a
     ld h, 0x00                  ; zero h
@@ -93,3 +92,34 @@ kq_check_flag_ei:
     jp z, kq_run_prod           ; skip ei if not enabled
     ei                          ; enable interrupts
     jp kq_main_loop
+
+; Returns the memory address of the kq_tbase queue entry for the provided
+; index.
+;
+kq_addr_by_idx:
+    ld hl, 0x0002               ; extract argument 2 from stack
+    add hl, sp                  ; skip over return address on stack
+    ld a, (hl)                  ; copy the single byte argument to c
+    ld h, 0x00                  ; zero h
+    ld l, a                     ; copy queue id to l
+    add hl, hl                  ; x2
+    add hl, hl                  ; x4
+    add hl, hl                  ; x8
+    ld de, kq_tbase             ; put base address in de
+    add hl, de                  ; add base address to calculated offset
+    ret
+
+; Returns the memory address of the kfn_tbase function entry for the provided
+; index.
+;
+kfn_addr_by_idx:
+    ld hl, 0x0002               ; extract argument 2 from stack
+    add hl, sp                  ; skip over return address on stack
+    ld a, (hl)                  ; copy the single byte argument to c
+    ld h, 0x00                  ; zero h
+    ld l, a                     ; copy queue id to l
+    add hl, hl                  ; x2
+    add hl, hl                  ; x4
+    ld de, kfn_tbase            ; put base address in de
+    add hl, de                  ; add base address to calculated offset
+    ret
