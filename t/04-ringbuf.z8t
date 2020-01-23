@@ -1,0 +1,39 @@
+# Test the ringbuf implementation
+>INCLUDE "init_16_buf.asm"
+>CODE
+main:
+    ld a, 0xaf              ; load test value
+    ld b, a                 ; put it into b
+    push bc                 ; push bc onto the 
+    call rb_writeb          ; call write function
+
+    halt                    ; end the test
+
+>INCLUDE "../04-ringbuf.asm"
+>RUN
+>REG HL 0x0000 "Return code correct"
+>MEM 0x100 "Queue status"
+0x0f 0x00 0x01 0xaf
+>RESET
+
+# Push 2 items into the ring buffer
+>INCLUDE "init_16_buf.asm"
+>CODE
+main:
+    ld a, 0xaf              ; load test value
+    ld b, a                 ; put it into b
+    push bc                 ; push bc onto the 
+    call rb_writeb          ; call write function
+
+    ld a, 0xbf              ; load test value
+    ld b, a                 ; put it into b
+    push bc                 ; push bc onto the 
+    call rb_writeb          ; call write function
+
+    halt                    ; end the test
+
+>INCLUDE "../04-ringbuf.asm"
+>RUN
+>REG HL 0x0000 "Return code correct"
+>MEM 0x100 "Queue status"
+0x0f 0x00 0x02 0xaf 0xbf

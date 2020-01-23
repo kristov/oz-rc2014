@@ -16,12 +16,13 @@ rb_writeb:
     cp b                        ; compare read pointer to test equality
     jr z, rbw_end               ; if read and write are equal abort
     ld (kq_pwrite), a           ; store advanced write pointer
-    ld hl, 0x0002               ; prepare hl to extract argument on the stack
+    ld hl, 0x0003               ; prepare hl to extract argument on the stack
     add hl, sp                  ; skip over return address on stack
     ld c, (hl)                  ; copy the single byte argument to c
     ld d, 0x00                  ; zero high byte of de
+    dec a                       ; bring back a to the write location
     ld e, a                     ; load e with new write pointer
-    ld hl, (kq_addr)            ; load the ring buffer base address
+    ld hl, kq_addr              ; load the ring buffer base address
     add hl, de                  ; add write pointer value to base
     ld (hl), c                  ; save c into the buffer
     ld hl, 0x0000               ; success
