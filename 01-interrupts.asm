@@ -62,16 +62,16 @@ k_rst38:
     nop
     nop
 
+k_int_reti:
+    ei                          ; enable interrupts
+    reti                        ; return from interrupt
+
 ; Table of kernel syscall functions
 ;
 k_syscall_tbase:
     dw k_syscall_noop           ; a no operation syscall id 0
     dw rb_writeb
     dw rb_readb
-
-k_int_reti:
-    ei                          ; enable interrupts
-    reti                        ; return from interrupt
 
 k_boot_msg:
     defb "oz 0.0\n", 0
