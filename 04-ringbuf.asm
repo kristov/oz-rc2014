@@ -11,6 +11,7 @@ rb_writeb:
     ld a, (kq_pread)            ; load the serial read pointer
     ld b, a                     ; copy it to b
     ld a, (kq_pwrite)           ; load the serial write pointer
+    ld e, a                     ; save the write pointer for later
     inc a                       ; advance the write pointer
     and c                       ; mask the pointer to wrap it
     cp b                        ; compare read pointer to test equality
@@ -20,8 +21,6 @@ rb_writeb:
     add hl, sp                  ; skip over return address on stack
     ld c, (hl)                  ; copy the single byte argument to c
     ld d, 0x00                  ; zero high byte of de
-    dec a                       ; bring back a to the write location
-    ld e, a                     ; load e with new write pointer
     ld hl, kq_addr              ; load the ring buffer base address
     add hl, de                  ; add write pointer value to base
     ld (hl), c                  ; save c into the buffer
