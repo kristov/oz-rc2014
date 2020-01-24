@@ -1,0 +1,17 @@
+>DIAG "---- TESTING READS ----"
+>DIAG "Fail to read an empty queue"
+>RESET
+>INCLUDE "init_16_buf.asm"
+>CODE
+main:
+    call rb_readb           ; call read function
+
+    halt                    ; end the test
+
+>INCLUDE "../04-ringbuf.asm"
+>RUN
+>REG HL 0xffff "Return code indicates failure"
+>MEM 0x100 "Queue status"
+0x0f 0x00 0x00
+0x00 0x00
+
