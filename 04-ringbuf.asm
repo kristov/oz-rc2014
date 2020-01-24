@@ -37,12 +37,13 @@ rb_readb:
     ld a, (kq_pread)            ; load the serial read pointer
     cp b                        ; compare write pointer to test equality
     jr z, rbr_end               ; if read and write are equal abort
+    ld e, a                     ; save the read pointer for later
     inc a                       ; advance the read pointer
     and c                       ; mask the pointer to wrap it
+    ld (kq_pread), a            ; store advanced read pointer
     ld d, 0x00                  ; zero high byte of de
-    ld e, a                     ; load e with new read pointer
-    ld hl, (kq_addr)            ; load the ring buffer base address
-    add hl, de                  ; add write pointer value to base
+    ld hl, kq_addr              ; load the ring buffer base address
+    add hl, de                  ; add read pointer value to base
     ld c, (hl)                  ; read the byte into c
     ld hl, 0x0000               ; success
 rbr_end:
