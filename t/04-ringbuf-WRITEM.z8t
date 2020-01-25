@@ -1,5 +1,45 @@
 >DIAG "---- TESTING BLOCK WRITES ----"
->DIAG "Write 8 bytes into an empty queue"
+>DIAG "Write 1 byte into start of queue"
+>RESET
+>INCLUDE "init_16_buf.asm"
+>CODE
+main:
+    ; load a chunk of memory with some data
+    ld hl, 0x0300
+    ld a, 0xbb
+    ld (hl), a
+
+    ; set up queue state
+    ld hl, kq_addr
+    inc hl
+    ld a, 0x00
+    ld (hl), a
+    inc hl
+    ld a, 0x00
+    ld (hl), a
+
+    ; call function to write 1 bytes
+    ld hl, 0x0300
+    push hl
+    ld c, 0x01
+    push bc
+
+    call rb_writem
+
+    halt
+
+>INCLUDE "../04-ringbuf.asm"
+>RUN
+>REG HL 0x0000 "Return code correct"
+>MEM 0x0300 "wrote the test data"
+0xbb 0x00
+
+>MEM 0x0100 "Queue data copied correctly"
+0x0f 0x00 0x01
+0xbb 0x00
+
+
+>DIAG "Write 8 bytes into start of queue"
 >RESET
 >INCLUDE "init_16_buf.asm"
 >CODE
@@ -13,10 +53,19 @@ loop:
     inc hl
     djnz loop
 
+    ; set up queue state
+    ld hl, kq_addr
+    inc hl
+    ld a, 0x00
+    ld (hl), a
+    inc hl
+    ld a, 0x00
+    ld (hl), a
+
     ; call function to write 8 bytes
     ld hl, 0x0300
     push hl
-    ld b, 0x08
+    ld c, 0x08
     push bc
 
     call rb_writem
@@ -25,5 +74,65 @@ loop:
 
 >INCLUDE "../04-ringbuf.asm"
 >RUN
->REG HL 0x0300 "Source register correct"
->REG DE 0x0103 "Destination register correct"
+>REG HL 0x0000 "Return code correct"
+>MEM 0x0300 "wrote the test data"
+0xbb 0xbb 0xbb 0xbb
+0xbb 0xbb 0xbb 0xbb
+0x00
+
+>MEM 0x0100 "Queue data copied correctly"
+0x0f 0x00 0x08
+0xbb 0xbb 0xbb 0xbb
+0xbb 0xbb 0xbb 0xbb
+0x00 0x00 0x00 0x00
+0x00 0x00 0x00 0x00
+
+
+>DIAG "Write 8 bytes from index 10 wrapping 2 bytes into start"
+>RESET
+>INCLUDE "init_16_buf.asm"
+>CODE
+main:
+    ; load a chunk of memory with some data
+    ld hl, 0x0300
+    ld a, 0xbb
+    ld b, 0x08
+loop:
+    ld (hl), a
+    inc hl
+    djnz loop
+
+    ; set up queue state
+    ld hl, kq_addr
+    inc hl
+    ld a, 0x03
+    ld (hl), a
+    inc hl
+    ld a, 0x0a
+    ld (hl), a
+
+    ; call function to write 8 bytes
+    ld hl, 0x0300
+    push hl
+    ld c, 0x08
+    push bc
+
+    call rb_writem
+
+    halt
+
+>INCLUDE "../04-ringbuf.asm"
+>RUN
+>REG HL 0x0000 "Return code correct"
+>MEM 0x0300 "wrote the test data"
+0xbb 0xbb 0xbb 0xbb
+0xbb 0xbb 0xbb 0xbb
+0x00
+
+>MEM 0x0100 "Queue data copied correctly"
+0x0f 0x03 0x02
+0xbb 0xbb 0x00 0x00
+0x00 0x00 0x00 0x00
+0x00 0x00 0xbb 0xbb
+0xbb 0xbb 0xbb 0xbb
+
