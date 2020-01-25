@@ -4,8 +4,7 @@
 >INCLUDE "init_16_buf.asm"
 >CODE
 main:
-    ld a, 0xaf              ; load test value
-    ld b, a                 ; put it into b
+    ld b, 0xaf              ; load test value
     push bc                 ; push bc onto the 
     call rb_writeb          ; call write function
 
@@ -24,13 +23,11 @@ main:
 >INCLUDE "init_16_buf.asm"
 >CODE
 main:
-    ld a, 0xaf              ; load test value
-    ld b, a                 ; put it into b
+    ld b, 0xaf              ; load test value
     push bc                 ; push bc onto the 
     call rb_writeb          ; call write function
 
-    ld a, 0xbf              ; load test value
-    ld b, a                 ; put it into b
+    ld b, 0xbf              ; load test value
     push bc                 ; push bc onto the 
     call rb_writeb          ; call write function
 
@@ -68,8 +65,7 @@ loop:
     djnz loop               ; jump to the loop
 
 ; Now put the last byte into the buffer. This should succeed.
-    ld a, 0xbf              ; load test value
-    ld b, a                 ; put it into b
+    ld b, 0xbf              ; load test value
     push bc                 ; push bc onto the 
     call rb_writeb          ; call write function
 
@@ -111,8 +107,7 @@ loop:
 
 ; Now put the last byte into the buffer. This should fail because it would
 ; leave the write pointer and read pointer equal.
-    ld a, 0xbf              ; load test value
-    ld b, a                 ; put it into b
+    ld b, 0xbf              ; load test value
     push bc                 ; push bc onto the 
     call rb_writeb          ; call write function
 
@@ -153,8 +148,7 @@ loop:
     djnz loop               ; jump to the loop
 
 ; Now put the last byte into the buffer. This should succeed.
-    ld a, 0xbf              ; load test value
-    ld b, a                 ; put it into b
+    ld b, 0xbf              ; load test value
     push bc                 ; push bc onto the 
     call rb_writeb          ; call write function
 
