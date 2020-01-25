@@ -4,11 +4,11 @@
 >INCLUDE "init_16_buf.asm"
 >CODE
 main:
-    ld c, 0xaf              ; load test value
-    push bc                 ; push bc onto the 
-    call rb_writeb          ; call write function
+    ld c, 0xaf
+    push bc
+    call rb_writeb
 
-    halt                    ; end the test
+    halt
 
 >INCLUDE "../04-ringbuf.asm"
 >RUN
@@ -23,15 +23,15 @@ main:
 >INCLUDE "init_16_buf.asm"
 >CODE
 main:
-    ld c, 0xaf              ; load test value
-    push bc                 ; push bc onto the 
-    call rb_writeb          ; call write function
+    ld c, 0xaf
+    push bc
+    call rb_writeb
 
-    ld c, 0xbf              ; load test value
-    push bc                 ; push bc onto the 
-    call rb_writeb          ; call write function
+    ld c, 0xbf
+    push bc
+    call rb_writeb
 
-    halt                    ; end the test
+    halt
 
 >INCLUDE "../04-ringbuf.asm"
 >RUN
@@ -57,19 +57,19 @@ main:
     inc hl
 
     ; copy 0xaf to the queue up to the last element
-    ld a, 0xaf              ; load test value
-    ld b, 0x0e              ; write 14 bytes
+    ld a, 0xaf
+    ld b, 0x0e
 loop:
-    ld (hl), a              ; write the byte
-    inc hl                  ; move to the next one
-    djnz loop               ; jump to the loop
+    ld (hl), a
+    inc hl
+    djnz loop
 
-; Now put the last byte into the buffer. This should succeed.
-    ld c, 0xbf              ; load test value
-    push bc                 ; push bc onto the 
-    call rb_writeb          ; call write function
+    ; now put the last byte into the buffer
+    ld c, 0xbf
+    push bc
+    call rb_writeb
 
-    halt                    ; end the test
+    halt
 
 >INCLUDE "../04-ringbuf.asm"
 >RUN
@@ -98,20 +98,20 @@ main:
     inc hl
 
     ; copy 0xaf to the queue up to the last element
-    ld a, 0xaf              ; load test value
-    ld b, 0x0f              ; write 15 bytes
+    ld a, 0xaf
+    ld b, 0x0f
 loop:
-    ld (hl), a              ; write the byte
-    inc hl                  ; move to the next one
-    djnz loop               ; jump to the loop
+    ld (hl), a
+    inc hl
+    djnz loop
 
-; Now put the last byte into the buffer. This should fail because it would
-; leave the write pointer and read pointer equal.
-    ld c, 0xbf              ; load test value
-    push bc                 ; push bc onto the 
-    call rb_writeb          ; call write function
+    ; this should fail because it would leave the write pointer and read
+    ; pointer equal
+    ld c, 0xbf
+    push bc
+    call rb_writeb
 
-    halt                    ; end the test
+    halt
 
 >INCLUDE "../04-ringbuf.asm"
 >RUN
@@ -140,19 +140,18 @@ main:
     inc hl
 
     ; copy 0xaf to the queue up to the last element
-    ld a, 0xaf              ; load test value
-    ld b, 0x0f              ; write 15 bytes
+    ld a, 0xaf
+    ld b, 0x0f
 loop:
-    ld (hl), a              ; write the byte
-    inc hl                  ; move to the next one
-    djnz loop               ; jump to the loop
+    ld (hl), a
+    inc hl
+    djnz loop
 
-; Now put the last byte into the buffer. This should succeed.
-    ld c, 0xbf              ; load test value
-    push bc                 ; push bc onto the 
-    call rb_writeb          ; call write function
+    ld c, 0xbf
+    push bc
+    call rb_writeb
 
-    halt                    ; end the test
+    halt
 
 >INCLUDE "../04-ringbuf.asm"
 >RUN
