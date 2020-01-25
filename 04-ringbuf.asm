@@ -52,6 +52,37 @@ rbwb_error:
     ld hl, 0xffff               ; error status
     ret
 
+; uint16_t rb_writem(uint16_t src, uint16_t count);
+; write a chunk of bytes to the queue
+rb_writem:
+    ld hl, 0x0003               ; prepare hl to extract argument on the stack
+    add hl, sp                  ; skip over return address on stack
+    ld c, (hl)                  ; load the count argument
+    call rb_space               ; get the number of free bytes on the queue
+    ld a, l                     ; load the counter from rb_space return
+    sub c                       ; subtract the desired count from available
+    jp c, rbwm_error            ; desired count is greater than available space
+    ld hl, 0x0003               ; prepare hl to extract argument on the stack
+    add hl, sp                  ; skip over return address on stack
+    ld b, (hl)                  ; load the count argument into b
+    inc hl                      ; skip over C
+    inc hl                      ; skip over B
+    ld d, (hl)                  ; load the src address L
+    inc hl                      ; skip over L
+    ld e, (hl)                  ; load the src address U
+    ld hl, kq_addr
+    ld c, (hl)                  ; load the mask
+    inc hl                      ; skip over mask
+    inc hl                      ; skip over read pointer
+    ld a, (hl)                  ; load the write pointer
+    inc hl                      ; skip over write pointer
+    ex de, hl                   ; exchange
+    ; TODO: all the hard shit
+    ret
+rbwm_error:
+    ld hl, 0xffff               ; error value
+    ret
+
 rb_readb:
     ld hl, kq_addr              ; set the queue base address
     ld c, (hl)                  ; load the queue mask

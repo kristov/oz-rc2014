@@ -1,0 +1,29 @@
+>DIAG "---- TESTING BLOCK WRITES ----"
+>DIAG "Write 8 bytes into an empty queue"
+>RESET
+>INCLUDE "init_16_buf.asm"
+>CODE
+main:
+    ; load a chunk of memory with some data
+    ld hl, 0x0300
+    ld a, 0xbb
+    ld b, 0x08
+loop:
+    ld (hl), a
+    inc hl
+    djnz loop
+
+    ; call function to write 8 bytes
+    ld hl, 0x0300
+    push hl
+    ld b, 0x08
+    push bc
+
+    call rb_writem
+
+    halt
+
+>INCLUDE "../04-ringbuf.asm"
+>RUN
+>REG HL 0x0300 "Source register correct"
+>REG DE 0x0103 "Destination register correct"
