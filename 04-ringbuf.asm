@@ -4,6 +4,25 @@
 ;   call rb_writeb
 ;   ; check hl
 
+; get the number of bytes that can be written to a buffer
+rb_space:
+    ld hl, kq_addr              ; set the ring buffer base address
+    ld c, (hl)                  ; load the queue mask
+    inc hl                      ; move to read pointer
+    ld b, (hl)                  ; load the read pointer
+    inc hl                      ; move to write pointer
+    ld a, (hl)                  ; load the write pointer
+    ld hl, 0x0000               ; space counter
+rbs_loop:
+    inc a                       ; advance the write pointer
+    and c                       ; mask the pointer to wrap it
+    cp b                        ; compare read pointer to test equality
+    jr z, rbs_end               ; if read and write are equal break
+    inc hl                      ; increment the counter
+    jp rbs_loop                 ; loop
+rbs_end:
+    ret
+
 rb_writeb:
     ld hl, kq_addr              ; set the queue base address
     ld c, (hl)                  ; load the queue mask
@@ -31,25 +50,6 @@ rb_writeb:
     ret
 rbwb_error:
     ld hl, 0xffff               ; error status
-    ret
-
-; get the number of bytes that can be written to a buffer
-rb_space:
-    ld hl, kq_addr              ; set the ring buffer base address
-    ld c, (hl)                  ; load the queue mask
-    inc hl                      ; move to read pointer
-    ld b, (hl)                  ; load the read pointer
-    inc hl                      ; move to write pointer
-    ld a, (hl)                  ; load the write pointer
-    ld hl, 0x0000               ; space counter
-rbs_loop:
-    inc a                       ; advance the write pointer
-    and c                       ; mask the pointer to wrap it
-    cp b                        ; compare read pointer to test equality
-    jr z, rbs_end               ; if read and write are equal break
-    inc hl                      ; increment the counter
-    jp rbs_loop                 ; loop
-rbs_end:
     ret
 
 rb_readb:
