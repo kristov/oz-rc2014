@@ -4,6 +4,7 @@
 ;   call rb_writeb
 ;   ; check hl
 
+; write a byte to the buffer
 rb_writeb:
     ld hl, 0xffff               ; error status
     ld a, (kq_mask)             ; load the queue mask
@@ -26,6 +27,24 @@ rb_writeb:
     ld (hl), c                  ; save c into the buffer
     ld hl, 0x0000               ; success
 rbw_end:
+    ret
+
+; get the number of bytes that can be written to a buffer
+rb_space:
+    ld a, (kq_mask)             ; load the queue mask
+    ld c, a                     ; copy it to d
+    ld a, (kq_pread)            ; load the serial read pointer
+    ld b, a                     ; copy it to b
+    ld a, (kq_pwrite)           ; load the serial write pointer
+    ld hl, 0x0000               ; space counter
+rbs_loop:
+    inc a                       ; advance the write pointer
+    and c                       ; mask the pointer to wrap it
+    cp b                        ; compare read pointer to test equality
+    jr z, rbs_end               ; if read and write are equal break
+    inc hl                      ; increment the counter
+    jp rbs_loop                 ; loop
+rbs_end:
     ret
 
 rb_readb:

@@ -1,0 +1,90 @@
+>DIAG "---- TESTING SPACE ----"
+>DIAG "Space of an empty queue"
+>RESET
+>INCLUDE "init_16_buf.asm"
+>CODE
+main:
+    ; call routine to get the space on the queue
+    call rb_space
+
+    halt                    ; end the test
+
+>INCLUDE "../04-ringbuf.asm"
+>RUN
+>REG HL 0x000f "15 bytes available for writing"
+>MEM 0x100 "Queue status"
+0x0f 0x00 0x00
+
+
+>DIAG "Space of a full queue"
+>RESET
+>INCLUDE "init_16_buf.asm"
+>CODE
+    ; set the write pointer
+    ld hl, kq_pwrite
+    ld a, 0x0f
+    ld (hl), a
+
+    ; call routine to get the space on the queue
+    call rb_space
+
+    halt                    ; end the test
+
+>INCLUDE "../04-ringbuf.asm"
+>RUN
+>REG HL 0x0000 "0 bytes available for writing"
+>MEM 0x100 "Queue status"
+0x0f 0x00 0x0f
+
+
+>DIAG "Space wrapped around the end"
+>RESET
+>INCLUDE "init_16_buf.asm"
+>CODE
+    ; set the write pointer
+    ld hl, kq_pwrite
+    ld a, 0x0f
+    ld (hl), a
+
+    ; set the read pointer
+    ld hl, kq_pread
+    ld a, 0x02
+    ld (hl), a
+
+    ; call routine to get the space on the queue
+    call rb_space
+
+    halt                    ; end the test
+
+>INCLUDE "../04-ringbuf.asm"
+>RUN
+>REG HL 0x0002 "2 bytes available for writing"
+>MEM 0x100 "Queue status"
+0x0f 0x02 0x0f
+
+
+>DIAG "Space more"
+>RESET
+>INCLUDE "init_16_buf.asm"
+>CODE
+    ; set the write pointer
+    ld hl, kq_pwrite
+    ld a, 0x02
+    ld (hl), a
+
+    ; set the read pointer
+    ld hl, kq_pread
+    ld a, 0x0f
+    ld (hl), a
+
+    ; call routine to get the space on the queue
+    call rb_space
+
+    halt                    ; end the test
+
+>INCLUDE "../04-ringbuf.asm"
+>RUN
+>REG HL 0x000c "12 bytes available for writing"
+>MEM 0x100 "Queue status"
+0x0f 0x0f 0x02
+
