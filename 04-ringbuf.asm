@@ -36,7 +36,7 @@ rb_writeb:
     cp b                        ; compare read pointer to test equality
     jr z, rbwb_error            ; if read and write are equal abort
     ld (hl), a                  ; store advanced write pointer
-    ld hl, 0x0003               ; prepare hl to extract argument on the stack
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
     add hl, sp                  ; skip over return address on stack
     ld c, (hl)                  ; copy the single byte argument to c
     ld d, 0x00                  ; zero high byte of de
@@ -55,14 +55,14 @@ rbwb_error:
 ; uint16_t rb_writem(uint16_t src, uint16_t count);
 ; write a chunk of bytes to the queue
 rb_writem:
-    ld hl, 0x0003               ; prepare hl to extract argument on the stack
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
     add hl, sp                  ; skip over return address on stack
     ld c, (hl)                  ; load the count argument
     call rb_space               ; get the number of free bytes on the queue
     ld a, l                     ; load the counter from rb_space return
     sub c                       ; subtract the desired count from available
     jp c, rbwm_error            ; desired count is greater than available space
-    ld hl, 0x0003               ; prepare hl to extract argument on the stack
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
     add hl, sp                  ; skip over return address on stack
     ld b, (hl)                  ; load the count argument into b
     inc hl                      ; skip over C
