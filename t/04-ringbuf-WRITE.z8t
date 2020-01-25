@@ -49,16 +49,23 @@ main:
 >INCLUDE "init_16_buf.asm"
 >CODE
 main:
+    ; set up the pointers
+    ld hl, kq_addr
+    inc hl
+    ld a, 0x00
+    ld (hl), a
+    inc hl
+    ld a, 0x0e
+    ld (hl), a
+    inc hl
+
+    ; copy 0xaf to the queue up to the last element
     ld a, 0xaf              ; load test value
-    ld hl, kq_addr          ; load the start of the table
     ld b, 0x0e              ; write 14 bytes
 loop:
     ld (hl), a              ; write the byte
     inc hl                  ; move to the next one
     djnz loop               ; jump to the loop
-    ld hl, kq_pwrite        ; load the write index
-    ld a, 0x0e              ; set it to 14
-    ld (hl), a              ; save it
 
 ; Now put the last byte into the buffer. This should succeed.
     ld a, 0xbf              ; load test value
@@ -84,16 +91,23 @@ loop:
 >INCLUDE "init_16_buf.asm"
 >CODE
 main:
+    ; set up the pointers
+    ld hl, kq_addr
+    inc hl
+    ld a, 0x00
+    ld (hl), a
+    inc hl
+    ld a, 0x0f
+    ld (hl), a
+    inc hl
+
+    ; copy 0xaf to the queue up to the last element
     ld a, 0xaf              ; load test value
-    ld hl, kq_addr          ; load the start of the table
     ld b, 0x0f              ; write 15 bytes
 loop:
     ld (hl), a              ; write the byte
     inc hl                  ; move to the next one
     djnz loop               ; jump to the loop
-    ld hl, kq_pwrite        ; load the write index
-    ld a, 0x0f              ; set it to 15
-    ld (hl), a              ; save it
 
 ; Now put the last byte into the buffer. This should fail because it would
 ; leave the write pointer and read pointer equal.
@@ -120,23 +134,25 @@ loop:
 >INCLUDE "init_16_buf.asm"
 >CODE
 main:
-    ld hl, kq_pread         ; load the read index location
-    ld a, 0x01              ; set it to 1
-    ld (hl), a              ; save it
+    ; set up the pointers
+    ld hl, kq_addr
+    inc hl
+    ld a, 0x01
+    ld (hl), a
+    inc hl
+    ld a, 0x0f
+    ld (hl), a
+    inc hl
 
+    ; copy 0xaf to the queue up to the last element
     ld a, 0xaf              ; load test value
-    ld hl, kq_addr          ; load the start of the table
     ld b, 0x0f              ; write 15 bytes
 loop:
     ld (hl), a              ; write the byte
     inc hl                  ; move to the next one
     djnz loop               ; jump to the loop
-    ld hl, kq_pwrite        ; load the write index location
-    ld a, 0x0f              ; set it to 15
-    ld (hl), a              ; save it
 
-; Now put the last byte into the buffer. This should fail because it would
-; leave the write pointer and read pointer equal.
+; Now put the last byte into the buffer. This should succeed.
     ld a, 0xbf              ; load test value
     ld b, a                 ; put it into b
     push bc                 ; push bc onto the 

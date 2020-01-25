@@ -21,13 +21,15 @@ main:
 >INCLUDE "init_16_buf.asm"
 >CODE
 main:
-    ld a, 0xaf              ; set byte to read
-    ld hl, kq_addr          ; set location
-    ld (hl), a              ; load the value
+    ld hl, kq_addr
+    inc hl
+    inc hl
+    ld a, 0x01
+    ld (hl), a
+    inc hl
+    ld a, 0xaf
+    ld (hl), a
 
-    ld a, 0x01              ; set write pointer value
-    ld hl, kq_pwrite        ; set location
-    ld (hl), a              ; load the write pointer
     call rb_readb           ; call read function
 
     halt                    ; end the test
@@ -46,29 +48,27 @@ main:
 >INCLUDE "init_16_buf.asm"
 >CODE
 main:
-    ; set all bytes in the queue to 0xaf
-    ld a, 0xaf
     ld hl, kq_addr
-    ld b, 0x10
+    inc hl
+    ld a, 0x0f
+    ld (hl), a
+    inc hl
+    ld a, 0x00
+    ld (hl), a
+    inc hl
+
+    ; Set byte 0 in the queue to 0xbf
+    ld a, 0xbf
+    ld (hl), a
+    inc hl
+
+    ; set all remaining bytes in the queue to 0xaf
+    ld a, 0xaf
+    ld b, 0x0f
 loop:
     ld (hl), a
     inc hl
     djnz loop
-
-    ; set the write pointer to position zero
-    ld hl, kq_pwrite
-    ld a, 0x00
-    ld (hl), a
-
-    ; set the read pointer to position 0x0f
-    ld hl, kq_pread
-    ld a, 0x0f
-    ld (hl), a
-
-    ; Set byte 0 in the queue to 0xbf
-    ld a, 0xbf
-    ld hl, kq_addr
-    ld (hl), a
 
     call rb_readb           ; call read function
 

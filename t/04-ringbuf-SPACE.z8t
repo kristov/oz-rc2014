@@ -4,10 +4,8 @@
 >INCLUDE "init_16_buf.asm"
 >CODE
 main:
-    ; call routine to get the space on the queue
     call rb_space
-
-    halt                    ; end the test
+    halt
 
 >INCLUDE "../04-ringbuf.asm"
 >RUN
@@ -21,14 +19,14 @@ main:
 >INCLUDE "init_16_buf.asm"
 >CODE
     ; set the write pointer
-    ld hl, kq_pwrite
+    ld hl, kq_addr
+    inc hl
+    inc hl
     ld a, 0x0f
     ld (hl), a
 
-    ; call routine to get the space on the queue
     call rb_space
-
-    halt                    ; end the test
+    halt
 
 >INCLUDE "../04-ringbuf.asm"
 >RUN
@@ -41,20 +39,16 @@ main:
 >RESET
 >INCLUDE "init_16_buf.asm"
 >CODE
-    ; set the write pointer
-    ld hl, kq_pwrite
+    ld hl, kq_addr
+    inc hl
+    ld a, 0x02
+    ld (hl), a
+    inc hl
     ld a, 0x0f
     ld (hl), a
 
-    ; set the read pointer
-    ld hl, kq_pread
-    ld a, 0x02
-    ld (hl), a
-
-    ; call routine to get the space on the queue
     call rb_space
-
-    halt                    ; end the test
+    halt
 
 >INCLUDE "../04-ringbuf.asm"
 >RUN
@@ -67,20 +61,16 @@ main:
 >RESET
 >INCLUDE "init_16_buf.asm"
 >CODE
-    ; set the write pointer
-    ld hl, kq_pwrite
+    ld hl, kq_addr
+    inc hl
+    ld a, 0x0f
+    ld (hl), a
+    inc hl
     ld a, 0x02
     ld (hl), a
 
-    ; set the read pointer
-    ld hl, kq_pread
-    ld a, 0x0f
-    ld (hl), a
-
-    ; call routine to get the space on the queue
     call rb_space
-
-    halt                    ; end the test
+    halt
 
 >INCLUDE "../04-ringbuf.asm"
 >RUN

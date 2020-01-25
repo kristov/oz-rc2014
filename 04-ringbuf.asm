@@ -4,38 +4,43 @@
 ;   call rb_writeb
 ;   ; check hl
 
-; write a byte to the buffer
 rb_writeb:
-    ld hl, 0xffff               ; error status
-    ld a, (kq_mask)             ; load the queue mask
-    ld c, a                     ; copy it to c
-    ld a, (kq_pread)            ; load the serial read pointer
-    ld b, a                     ; copy it to b
-    ld a, (kq_pwrite)           ; load the serial write pointer
+    ld hl, kq_addr              ; set the queue base address
+    ld c, (hl)                  ; load the queue mask
+    inc hl                      ; move to read pointer
+    ld b, (hl)                  ; load the read pointer
+    inc hl                      ; move to write pointer
+    ld a, (hl)                  ; load the write pointer
     ld e, a                     ; save the write pointer for later
     inc a                       ; advance the write pointer
     and c                       ; mask the pointer to wrap it
     cp b                        ; compare read pointer to test equality
-    jr z, rbw_end               ; if read and write are equal abort
-    ld (kq_pwrite), a           ; store advanced write pointer
+    jr z, rbwb_error            ; if read and write are equal abort
+    ld (hl), a                  ; store advanced write pointer
     ld hl, 0x0003               ; prepare hl to extract argument on the stack
     add hl, sp                  ; skip over return address on stack
     ld c, (hl)                  ; copy the single byte argument to c
     ld d, 0x00                  ; zero high byte of de
-    ld hl, kq_addr              ; load the ring buffer base address
+    ld hl, kq_addr              ; set the queue base address
+    inc hl                      ; move over mask
+    inc hl                      ; move over read pointer
+    inc hl                      ; move over write pointer
     add hl, de                  ; add write pointer value to base
     ld (hl), c                  ; save c into the buffer
     ld hl, 0x0000               ; success
-rbw_end:
+    ret
+rbwb_error:
+    ld hl, 0xffff               ; error status
     ret
 
 ; get the number of bytes that can be written to a buffer
 rb_space:
-    ld a, (kq_mask)             ; load the queue mask
-    ld c, a                     ; copy it to d
-    ld a, (kq_pread)            ; load the serial read pointer
-    ld b, a                     ; copy it to b
-    ld a, (kq_pwrite)           ; load the serial write pointer
+    ld hl, kq_addr              ; set the ring buffer base address
+    ld c, (hl)                  ; load the queue mask
+    inc hl                      ; move to read pointer
+    ld b, (hl)                  ; load the read pointer
+    inc hl                      ; move to write pointer
+    ld a, (hl)                  ; load the write pointer
     ld hl, 0x0000               ; space counter
 rbs_loop:
     inc a                       ; advance the write pointer
@@ -48,23 +53,27 @@ rbs_end:
     ret
 
 rb_readb:
-    ld hl, 0xffff               ; error status
-    ld a, (kq_mask)             ; load the queue mask
-    ld c, a                     ; copy it to c
-    ld a, (kq_pwrite)           ; load the serial write pointer
-    ld b, a                     ; copy it to b
-    ld a, (kq_pread)            ; load the serial read pointer
+    ld hl, kq_addr              ; set the queue base address
+    ld c, (hl)                  ; load the queue mask
+    inc hl                      ; move to read pointer
+    ld a, (hl)                  ; load the read pointer
+    inc hl                      ; move to write pointer
+    ld b, (hl)                  ; load the write pointer
     cp b                        ; compare write pointer to test equality
-    jr z, rbr_end               ; if read and write are equal abort
+    jr z, rbrb_error            ; if read and write are equal abort
     ld e, a                     ; save the read pointer for later
     inc a                       ; advance the read pointer
     and c                       ; mask the pointer to wrap it
-    ld (kq_pread), a            ; store advanced read pointer
+    dec hl                      ; decrement hl to read pointer address
+    ld (hl), a                  ; store advanced read pointer
+    inc hl                      ; move over read pointer
+    inc hl                      ; move over write pointer
     ld d, 0x00                  ; zero high byte of de
-    ld hl, kq_addr              ; load the ring buffer base address
     add hl, de                  ; add read pointer value to base
     ld c, (hl)                  ; read the byte into c
     ld hl, 0x0000               ; success
-rbr_end:
+    ret
+rbrb_error:
+    ld hl, 0xffff               ; error status
     ret
 
