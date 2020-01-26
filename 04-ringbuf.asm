@@ -4,7 +4,8 @@
 ;   call rb_writeb
 ;   ; check hl
 
-; get the number of bytes that can be written to a buffer
+; Get the number of bytes that can be written to a buffer.
+;
 rb_space:
     ld hl, kq_addr              ; set the ring buffer base address
     ld c, (hl)                  ; load the queue mask
@@ -23,7 +24,8 @@ rbs_loop:
 rbs_end:
     ret
 
-; get the number of bytes stored in the queue
+; Get the number of bytes stored in the queue.
+;
 rb_count:
     ld hl, kq_addr              ; set the ring buffer base address
     ld c, (hl)                  ; load the queue mask
@@ -42,6 +44,8 @@ rbc_loop:
 rbc_end:
     ret
 
+; Write a single byte to the queue.
+;
 rb_writeb:
     ld hl, kq_addr              ; set the queue base address
     ld c, (hl)                  ; load the queue mask
@@ -71,8 +75,10 @@ rbwb_error:
     ld hl, 0xffff               ; error status
     ret
 
-; uint16_t rb_writem(uint16_t src, uint16_t count);
-; write a chunk of bytes to the queue
+; Write a chunk of bytes to the queue.
+;
+;     uint16_t rb_writem(uint16_t src, uint16_t count);
+;
 rb_writem:
     ; check if the count is greater than available space
     call rb_space               ; get the number of free bytes on the queue
@@ -138,6 +144,8 @@ rbwm_error:
     ld hl, 0xffff               ; set error value
     ret
 
+; Read a single byte from the queue.
+;
 rb_readb:
     ld hl, kq_addr              ; set the queue base address
     ld c, (hl)                  ; load the queue mask
@@ -163,6 +171,8 @@ rbrb_error:
     ld hl, 0xffff               ; error status
     ret
 
+; Read all available bytes from a queue into a memory address.
+;
 rb_readm:
     call rb_count               ; get the number of bytes in the queue
     ld a, l                     ; copy it to a
