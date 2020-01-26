@@ -10,7 +10,7 @@ main:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x000f "15 bytes available for writing"
->MEM 0x100 "Queue status"
+>MEM 0x0300 "Queue status"
 0x0f 0x00 0x00
 
 
@@ -31,7 +31,7 @@ main:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x0000 "0 bytes available for writing"
->MEM 0x100 "Queue status"
+>MEM 0x0300 "Queue status"
 0x0f 0x00 0x0f
 
 
@@ -53,7 +53,7 @@ main:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x0002 "2 bytes available for writing"
->MEM 0x100 "Queue status"
+>MEM 0x0300 "Queue status"
 0x0f 0x02 0x0f
 
 
@@ -75,7 +75,7 @@ main:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x000c "12 bytes available for writing"
->MEM 0x100 "Queue status"
+>MEM 0x0300 "Queue status"
 0x0f 0x0f 0x02
 
 
@@ -97,7 +97,7 @@ main:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x0008 "8 bytes available for writing"
->MEM 0x100 "Queue status"
+>MEM 0x0300 "Queue status"
 0x0f 0x03 0x0a
 
 >DIAG "---- TESTING COUNT ----"
@@ -112,7 +112,7 @@ main:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x0000 "0 bytes in queue"
->MEM 0x100 "Queue status"
+>MEM 0x0300 "Queue status"
 0x0f 0x00 0x00
 
 
@@ -133,7 +133,7 @@ main:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x000f "15 bytes in queue"
->MEM 0x100 "Queue status"
+>MEM 0x0300 "Queue status"
 0x0f 0x00 0x0f
 
 
@@ -155,7 +155,7 @@ main:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x000d "13 bytes in queue"
->MEM 0x100 "Queue status"
+>MEM 0x0300 "Queue status"
 0x0f 0x02 0x0f
 
 
@@ -177,7 +177,7 @@ main:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x0003 "3 bytes in queue"
->MEM 0x100 "Queue status"
+>MEM 0x0300 "Queue status"
 0x0f 0x0f 0x02
 
 
@@ -199,6 +199,6 @@ main:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x0007 "7 bytes in queue"
->MEM 0x100 "Queue status"
+>MEM 0x0300 "Queue status"
 0x0f 0x03 0x0a
 
