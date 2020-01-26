@@ -79,13 +79,10 @@ rb_writem:
     ld a, l                     ; load the counter from rb_space return
     ld hl, 0x0002               ; prepare hl to extract argument on the stack
     add hl, sp                  ; skip over return address on stack
-    ld c, (hl)                  ; load the count argument
-    sub c                       ; subtract the desired count from available
+    ld b, (hl)                  ; load the count argument
+    sub b                       ; subtract the desired count from available
     jp c, rbwm_error            ; desired count is greater than available space
     ; load count and source address arguments
-    ld hl, 0x0002               ; prepare hl to extract argument on the stack
-    add hl, sp                  ; skip over return address on stack
-    ld b, (hl)                  ; load the count argument into b
     inc hl                      ; skip over B
     inc hl                      ; skip over C
     ld e, (hl)                  ; load the src address L
@@ -164,5 +161,64 @@ rb_readb:
     ret
 rbrb_error:
     ld hl, 0xffff               ; error status
+    ret
+
+rb_readm:
+    call rb_count               ; get the number of bytes in the queue
+    ld a, l                     ; copy it to a
+    or a                        ; test for zero flags
+    jp z, rbrm_zero             ; jump to return zero
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
+    add hl, sp                  ; skip over return address on stack
+    ld e, (hl)                  ; load the dest address L
+    inc hl                      ; skip over L
+    ld d, (hl)                  ; load the dest address U
+    ld b, 0x00                  ; zero high byte of b
+    ld c, a                     ; set counter to number bytes in queue
+    push bc                     ; push the byte count for return
+    push de                     ; save destination for later
+    ld hl, kq_addr              ; set the queue base address
+    ld b, (hl)                  ; load the queue mask
+    inc hl                      ; move to read pointer
+    ld a, (hl)                  ; load the read pointer
+    inc hl                      ; move over read pointer
+    inc hl                      ; move over write pointer
+    ld d, 0x00                  ; zero high byte of de
+    ld e, a                     ; copy read point to lower byte of de
+    add hl, de                  ; add read pointer value to base
+    pop de                      ; restore destination
+rbrm_loop:
+    push af                     ; save the read pointer
+    ld a, (hl)                  ; read the source byte
+    ex de, hl                   ; hl is destination
+    ld (hl), a                  ; write the destination byte
+    dec c                       ; decrement the counter
+    jp z, rbrm_end              ; finished writing
+    inc hl                      ; increment the destination
+    ex de, hl                   ; hl is source
+    inc hl                      ; increment the source
+    pop af                      ; restore the read pointer
+    inc a                       ; advance the read pointer
+    and b                       ; mask the pointer to wrap it
+    jp nz, rbrm_loop            ; if it was not reset to zero then loop
+    ; zero the pointers to the beginning of the queue
+    ld hl, kq_addr              ; reset source
+    inc hl                      ; skip over mask
+    inc hl                      ; skip over read pointer
+    inc hl                      ; skip over write pointer
+    jp rbrm_loop                ; continue writing
+rbrm_end:
+    ; save the new write pointer
+    pop af                      ; restore the read pointer
+    inc a                       ; increment the read pointer
+    and c                       ; mask it to wrap
+    ld hl, kq_addr              ; set destination
+    inc hl                      ; skip over mask
+    ld (hl), a                  ; save the incremented read pointer
+    inc hl                      ; skip over write pointer
+    pop hl                      ; return the original count of bytes
+    ret
+rbrm_zero:
+    ld hl, 0x0000               ; zero bytes read
     ret
 
