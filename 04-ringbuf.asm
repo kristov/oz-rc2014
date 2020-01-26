@@ -23,6 +23,25 @@ rbs_loop:
 rbs_end:
     ret
 
+; get the number of bytes stored in the queue
+rb_count:
+    ld hl, kq_addr              ; set the ring buffer base address
+    ld c, (hl)                  ; load the queue mask
+    inc hl                      ; move to read pointer
+    ld a, (hl)                  ; load the read pointer
+    inc hl                      ; move to write pointer
+    ld b, (hl)                  ; load the write pointer
+    ld hl, 0x0000               ; byte counter
+rbc_loop:
+    and c                       ; mask the pointer to wrap it
+    cp b                        ; compare read pointer to test equality
+    jr z, rbc_end               ; if read and write are equal break
+    inc a                       ; advance the read pointer
+    inc hl                      ; increment the counter
+    jp rbc_loop                 ; loop
+rbc_end:
+    ret
+
 rb_writeb:
     ld hl, kq_addr              ; set the queue base address
     ld c, (hl)                  ; load the queue mask

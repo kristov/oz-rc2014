@@ -100,3 +100,105 @@ main:
 >MEM 0x100 "Queue status"
 0x0f 0x03 0x0a
 
+>DIAG "---- TESTING COUNT ----"
+>DIAG "Count of an empty queue"
+>RESET
+>INCLUDE "init_16_buf.asm"
+>CODE
+main:
+    call rb_count
+    halt
+
+>INCLUDE "../04-ringbuf.asm"
+>RUN
+>REG HL 0x0000 "0 bytes in queue"
+>MEM 0x100 "Queue status"
+0x0f 0x00 0x00
+
+
+>DIAG "Count of a full queue"
+>RESET
+>INCLUDE "init_16_buf.asm"
+>CODE
+    ; set the write pointer
+    ld hl, kq_addr
+    inc hl
+    inc hl
+    ld a, 0x0f
+    ld (hl), a
+
+    call rb_count
+    halt
+
+>INCLUDE "../04-ringbuf.asm"
+>RUN
+>REG HL 0x000f "15 bytes in queue"
+>MEM 0x100 "Queue status"
+0x0f 0x00 0x0f
+
+
+>DIAG "Count wrapped around the end"
+>RESET
+>INCLUDE "init_16_buf.asm"
+>CODE
+    ld hl, kq_addr
+    inc hl
+    ld a, 0x02
+    ld (hl), a
+    inc hl
+    ld a, 0x0f
+    ld (hl), a
+
+    call rb_count
+    halt
+
+>INCLUDE "../04-ringbuf.asm"
+>RUN
+>REG HL 0x000d "13 bytes in queue"
+>MEM 0x100 "Queue status"
+0x0f 0x02 0x0f
+
+
+>DIAG "Count more"
+>RESET
+>INCLUDE "init_16_buf.asm"
+>CODE
+    ld hl, kq_addr
+    inc hl
+    ld a, 0x0f
+    ld (hl), a
+    inc hl
+    ld a, 0x02
+    ld (hl), a
+
+    call rb_count
+    halt
+
+>INCLUDE "../04-ringbuf.asm"
+>RUN
+>REG HL 0x0003 "3 bytes in queue"
+>MEM 0x100 "Queue status"
+0x0f 0x0f 0x02
+
+
+>DIAG "Count more more more"
+>RESET
+>INCLUDE "init_16_buf.asm"
+>CODE
+    ld hl, kq_addr
+    inc hl
+    ld a, 0x03
+    ld (hl), a
+    inc hl
+    ld a, 0x0a
+    ld (hl), a
+
+    call rb_count
+    halt
+
+>INCLUDE "../04-ringbuf.asm"
+>RUN
+>REG HL 0x0007 "7 bytes in queue"
+>MEM 0x100 "Queue status"
+0x0f 0x03 0x0a
+
