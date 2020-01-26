@@ -1,4 +1,4 @@
-kq_addr: equ 0x0100          ; location of queue
+kq_addr: equ 0x0300          ; location of queue
 
 init:
     ; set up a 16 byte queue

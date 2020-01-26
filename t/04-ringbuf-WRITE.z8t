@@ -13,7 +13,7 @@ main:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x0000 "Return code correct"
->MEM 0x0100 "Queue status"
+>MEM 0x0300 "Queue status"
 0x0f 0x00 0x01
 0xaf 0x00
 
@@ -36,7 +36,7 @@ main:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x0000 "Return code correct"
->MEM 0x0100 "Queue data filled with correct bytes"
+>MEM 0x0300 "Queue data filled with correct bytes"
 0x0f 0x00 0x02
 0xaf 0xbf 0x00
 
@@ -74,7 +74,7 @@ loop:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x0000 "Return code correct"
->MEM 0x0100 "Queue data filled with 15 bytes"
+>MEM 0x0300 "Queue data filled with 15 bytes"
 0x0f 0x00 0x0f
 0xaf 0xaf 0xaf 0xaf
 0xaf 0xaf 0xaf 0xaf
@@ -116,7 +116,7 @@ loop:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0xffff "Return code indicates failure"
->MEM 0x0100 "Queue data was not changed"
+>MEM 0x0300 "Queue data was not changed"
 0x0f 0x00 0x0f
 0xaf 0xaf 0xaf 0xaf
 0xaf 0xaf 0xaf 0xaf
@@ -156,7 +156,7 @@ loop:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x0000 "Return code indicates success"
->MEM 0x0100 "Queue data filled with 16 bytes"
+>MEM 0x0300 "Queue data filled with 16 bytes"
 0x0f 0x01 0x00
 0xaf 0xaf 0xaf 0xaf
 0xaf 0xaf 0xaf 0xaf

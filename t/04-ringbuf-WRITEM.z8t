@@ -5,7 +5,7 @@
 >CODE
 main:
     ; load a chunk of memory with some data
-    ld hl, 0x0300
+    ld hl, 0x0400
     ld a, 0xbb
     ld (hl), a
 
@@ -19,7 +19,7 @@ main:
     ld (hl), a
 
     ; call function to write 1 bytes
-    ld hl, 0x0300
+    ld hl, 0x0400
     push hl
     ld c, 0x01
     push bc
@@ -31,10 +31,10 @@ main:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x0000 "Return code correct"
->MEM 0x0300 "wrote the test data"
+>MEM 0x0400 "wrote the test data"
 0xbb 0x00
 
->MEM 0x0100 "Queue data copied correctly"
+>MEM 0x0300 "Queue data copied correctly"
 0x0f 0x00 0x01
 0xbb 0x00
 >CYCLES 1135
@@ -46,7 +46,7 @@ main:
 >CODE
 main:
     ; load a chunk of memory with some data
-    ld hl, 0x0300
+    ld hl, 0x0400
     ld a, 0xbb
     ld b, 0x08
 loop:
@@ -64,7 +64,7 @@ loop:
     ld (hl), a
 
     ; call function to write 8 bytes
-    ld hl, 0x0300
+    ld hl, 0x0400
     push hl
     ld c, 0x08
     push bc
@@ -76,12 +76,12 @@ loop:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x0000 "Return code correct"
->MEM 0x0300 "wrote the test data"
+>MEM 0x0400 "wrote the test data"
 0xbb 0xbb 0xbb 0xbb
 0xbb 0xbb 0xbb 0xbb
 0x00
 
->MEM 0x0100 "Queue data copied correctly"
+>MEM 0x0300 "Queue data copied correctly"
 0x0f 0x00 0x08
 0xbb 0xbb 0xbb 0xbb
 0xbb 0xbb 0xbb 0xbb
@@ -96,7 +96,7 @@ loop:
 >CODE
 main:
     ; load a chunk of memory with some data
-    ld hl, 0x0300
+    ld hl, 0x0400
     ld a, 0xbb
     ld b, 0x08
 loop:
@@ -114,7 +114,7 @@ loop:
     ld (hl), a
 
     ; call function to write 8 bytes
-    ld hl, 0x0300
+    ld hl, 0x0400
     push hl
     ld c, 0x08
     push bc
@@ -126,12 +126,12 @@ loop:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0x0000 "Return code correct"
->MEM 0x0300 "wrote the test data"
+>MEM 0x0400 "wrote the test data"
 0xbb 0xbb 0xbb 0xbb
 0xbb 0xbb 0xbb 0xbb
 0x00
 
->MEM 0x0100 "Queue data copied correctly"
+>MEM 0x0300 "Queue data copied correctly"
 0x0f 0x03 0x02
 0xbb 0xbb 0x00 0x00
 0x00 0x00 0x00 0x00
