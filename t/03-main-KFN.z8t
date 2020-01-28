@@ -1,0 +1,22 @@
+>DIAG "---- TESTING CALLING FUNC ----"
+>DIAG "Basic"
+>RESET
+>INCLUDE "init_kqueue_status.asm"
+>CODE
+main:
+    ld hl, test_call
+    ld (kfn_addr), hl
+
+    call kq_run_func
+
+    halt
+
+test_call:
+    ld a, 0x0b
+    ld (0x0800), a
+    ret
+
+>INCLUDE "../03-main.asm"
+>RUN
+>MEM 0x0800 "Random byte set"
+0x0b
