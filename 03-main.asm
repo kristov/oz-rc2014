@@ -1,8 +1,7 @@
 ; Returns the index of the next available queue record.
 ;
 kqs_next_q_id:
-    ld hl, kq_curr_id           ; set the current queue idx addr
-    ld a, (hl)                  ; load the current queue idx into a
+    ld a, (kq_curr_id)          ; load the current queue idx into a
     ld c, kqs_mask              ; set the queue status mask
 kqsnq_next:
     inc a                       ; increment it
