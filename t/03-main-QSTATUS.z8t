@@ -1,0 +1,57 @@
+>DIAG "---- TESTING QUEUE STATUS TABLE ----"
+>DIAG "Current idx 1, next available 3"
+>RESET
+>INCLUDE "init_kqueue_status.asm"
+>CODE
+main:
+    ; set the kq_curr_id variable to 1
+    ld a, 0x01
+    ld hl, kq_curr_id
+    ld (hl), a
+
+    ; 
+    ld a, 0xff
+    ld hl, kqs_tbase
+    inc hl
+    ld (hl), a
+    inc hl
+    inc hl
+    ld (hl), a
+
+    call kqs_next_q_id
+
+    halt
+
+>INCLUDE "../03-main.asm"
+>RUN
+>REG HL 0x03 "Return code indicates failure"
+
+
+>DIAG "Current idx 3, next available 1"
+>RESET
+>INCLUDE "init_kqueue_status.asm"
+>CODE
+main:
+    ; set the kq_curr_id variable to 3
+    ld a, 0x03
+    ld hl, kq_curr_id
+    ld (hl), a
+
+    ; 
+    ld a, 0xff
+    ld hl, kqs_tbase
+    inc hl
+    ld (hl), a
+    inc hl
+    inc hl
+    ld (hl), a
+
+    call kqs_next_q_id
+
+    halt
+
+>INCLUDE "../03-main.asm"
+>RUN
+>REG HL 0x01 "Return code indicates failure"
+
+
