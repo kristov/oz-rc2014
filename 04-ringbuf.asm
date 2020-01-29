@@ -85,12 +85,12 @@ rb_writem:
     ld a, l                     ; load the counter from rb_space return
     ld hl, 0x0002               ; prepare hl to extract argument on the stack
     add hl, sp                  ; skip over return address on stack
-    ld b, (hl)                  ; load the count argument
+    ld b, (hl)                  ; load the count argument from low byte
     sub b                       ; subtract the desired count from available
     jp c, rbwm_error            ; desired count is greater than available space
     ; load count and source address arguments
-    inc hl                      ; skip over B
-    inc hl                      ; skip over C
+    inc hl                      ; skip over count low byte
+    inc hl                      ; skip over count high byte
     ld e, (hl)                  ; load the src address L
     inc hl                      ; skip over L
     ld d, (hl)                  ; load the src address U
