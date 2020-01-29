@@ -5,7 +5,7 @@
 >CODE
 main:
     ld hl, test_call
-    ld (kfn_addr), hl
+    push hl
 
     call kq_run_func
 
