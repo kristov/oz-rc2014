@@ -1,7 +1,7 @@
 >DIAG "---- TESTING CALLING FUNC ----"
 >DIAG "Basic"
 >RESET
->INCLUDE "init_kqueue_status.asm"
+>INCLUDE "init.asm"
 >CODE
 main:
     ld hl, test_call

@@ -1,7 +1,7 @@
 >DIAG "---- TESTING QUEUE STATUS TABLE ----"
 >DIAG "Current idx 1, next available 3"
 >RESET
->INCLUDE "init_kqueue_status.asm"
+>INCLUDE "init.asm"
 >CODE
 main:
     ; set the kq_curr_id variable to 1
@@ -29,7 +29,7 @@ main:
 
 >DIAG "Current idx 3, next available 1"
 >RESET
->INCLUDE "init_kqueue_status.asm"
+>INCLUDE "init.asm"
 >CODE
 main:
     ; set the kq_curr_id variable to 3
