@@ -1,7 +1,7 @@
 >DIAG "---- TESTING BLOCK WRITES ----"
 >DIAG "Write 1 byte into start of queue"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
 main:
     ; load a chunk of memory with some data
@@ -10,7 +10,7 @@ main:
     ld (hl), a
 
     ; set up queue state
-    ld hl, kq_addr
+    ld hl, (kq_addr)
     inc hl
     ld a, 0x00
     ld (hl), a
@@ -37,12 +37,12 @@ main:
 >MEM 0x0300 "Queue data copied correctly"
 0x0f 0x00 0x01
 0xbb 0x00
->CYCLES 1135
+>CYCLES 1147
 
 
 >DIAG "Write 8 bytes into start of queue"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
 main:
     ; load a chunk of memory with some data
@@ -55,7 +55,7 @@ loop:
     djnz loop
 
     ; set up queue state
-    ld hl, kq_addr
+    ld hl, (kq_addr)
     inc hl
     ld a, 0x00
     ld (hl), a
@@ -87,12 +87,12 @@ loop:
 0xbb 0xbb 0xbb 0xbb
 0x00 0x00 0x00 0x00
 0x00 0x00 0x00 0x00
->CYCLES 1947
+>CYCLES 1959
 
 
 >DIAG "Write 8 bytes from index 10 wrapping 2 bytes into start"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
 main:
     ; load a chunk of memory with some data
@@ -105,7 +105,7 @@ loop:
     djnz loop
 
     ; set up queue state
-    ld hl, kq_addr
+    ld hl, (kq_addr)
     inc hl
     ld a, 0x03
     ld (hl), a
@@ -137,5 +137,5 @@ loop:
 0x00 0x00 0x00 0x00
 0x00 0x00 0xbb 0xbb
 0xbb 0xbb 0xbb 0xbb
->CYCLES 1748
+>CYCLES 1766
 

@@ -1,7 +1,7 @@
 >DIAG "---- TESTING READS ----"
 >DIAG "Fail to read an empty queue"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
 main:
     call rb_readb           ; call read function
@@ -11,17 +11,17 @@ main:
 >INCLUDE "../04-ringbuf.asm"
 >RUN
 >REG HL 0xffff "Return code indicates failure"
->MEM 0x100 "Queue status"
+>MEM 0x0300 "Queue status"
 0x0f 0x00 0x00
 0x00 0x00
 
 
 >DIAG "Read a queue with one byte"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
 main:
-    ld hl, kq_addr
+    ld hl, (kq_addr)
     inc hl
     inc hl
     ld a, 0x01
@@ -38,17 +38,17 @@ main:
 >RUN
 >REG HL 0x0000 "Return code indicates success"
 >REG C  0xaf "Register C contains the read byte"
->MEM 0x100 "Queue status"
+>MEM 0x0300 "Queue status"
 0x0f 0x01 0x01
 0xaf 0x00
 
 
 >DIAG "Read a byte when it wraps around the end"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
 main:
-    ld hl, kq_addr
+    ld hl, (kq_addr)
     inc hl
     ld a, 0x0f
     ld (hl), a
@@ -78,7 +78,7 @@ loop:
 >RUN
 >REG HL 0x0000 "Return code indicates success"
 >REG C  0xaf "Register C contains the read byte"
->MEM 0x100 "Queue status"
+>MEM 0x0300 "Queue status"
 0x0f 0x00 0x00
 0xbf 0xaf 0xaf 0xaf
 0xaf 0xaf 0xaf 0xaf

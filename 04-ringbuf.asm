@@ -7,7 +7,7 @@
 ; Get the number of bytes that can be written to a buffer.
 ;
 rb_space:
-    ld hl, kq_addr              ; set the ring buffer base address
+    ld hl, (kq_addr)            ; load the ring buffer base address
     ld c, (hl)                  ; load the queue mask
     inc hl                      ; move to read pointer
     ld b, (hl)                  ; load the read pointer
@@ -27,7 +27,7 @@ rbs_end:
 ; Get the number of bytes stored in the queue.
 ;
 rb_count:
-    ld hl, kq_addr              ; set the ring buffer base address
+    ld hl, (kq_addr)            ; load the ring buffer base address
     ld c, (hl)                  ; load the queue mask
     inc hl                      ; move to read pointer
     ld a, (hl)                  ; load the read pointer
@@ -47,7 +47,7 @@ rbc_end:
 ; Write a single byte to the queue.
 ;
 rb_writeb:
-    ld hl, kq_addr              ; set the queue base address
+    ld hl, (kq_addr)            ; load the queue base address
     ld c, (hl)                  ; load the queue mask
     inc hl                      ; move to read pointer
     ld b, (hl)                  ; load the read pointer
@@ -63,7 +63,7 @@ rb_writeb:
     add hl, sp                  ; skip over return address on stack
     ld c, (hl)                  ; copy the single byte argument to c
     ld d, 0x00                  ; zero high byte of de
-    ld hl, kq_addr              ; set the queue base address
+    ld hl, (kq_addr)            ; set the queue base address
     inc hl                      ; move over mask
     inc hl                      ; move over read pointer
     inc hl                      ; move over write pointer
@@ -96,7 +96,7 @@ rb_writem:
     ld d, (hl)                  ; load the src address U
     push de                     ; save source address
     ; set up the destination address
-    ld hl, kq_addr              ; load the base of the table
+    ld hl, (kq_addr)            ; load the base of the table
     ld c, (hl)                  ; load the mask into c
     inc hl                      ; skip over mask
     inc hl                      ; skip over read pointer
@@ -123,7 +123,7 @@ rbwm_loop:
     jp nz, rbwm_loop            ; if it was not reset to zero then loop
     ; zero the pointers to the beginning of the queue
     ex de, hl                   ; hl is destination
-    ld hl, kq_addr              ; reset destination
+    ld hl, (kq_addr)            ; reset destination
     inc hl                      ; skip over mask
     inc hl                      ; skip over read pointer
     inc hl                      ; skip over write pointer
@@ -134,7 +134,7 @@ rbwm_end:
     pop af                      ; restore the write pointer
     inc a                       ; increment the write pointer
     and c                       ; mask it to wrap
-    ld hl, kq_addr              ; set destination
+    ld hl, (kq_addr)            ; set destination
     inc hl                      ; skip over mask
     inc hl                      ; skip over read pointer
     ld (hl), a                  ; save the incremented write pointer
@@ -147,7 +147,7 @@ rbwm_error:
 ; Read a single byte from the queue.
 ;
 rb_readb:
-    ld hl, kq_addr              ; set the queue base address
+    ld hl, (kq_addr)            ; set the queue base address
     ld c, (hl)                  ; load the queue mask
     inc hl                      ; move to read pointer
     ld a, (hl)                  ; load the read pointer
@@ -187,7 +187,7 @@ rb_readm:
     ld c, a                     ; set counter to number bytes in queue
     push bc                     ; push the byte count for return
     push de                     ; save destination for later
-    ld hl, kq_addr              ; set the queue base address
+    ld hl, (kq_addr)            ; load the queue base address
     ld b, (hl)                  ; load the queue mask
     inc hl                      ; move to read pointer
     ld a, (hl)                  ; load the read pointer
@@ -212,7 +212,7 @@ rbrm_loop:
     and b                       ; mask the pointer to wrap it
     jp nz, rbrm_loop            ; if it was not reset to zero then loop
     ; zero the pointers to the beginning of the queue
-    ld hl, kq_addr              ; reset source
+    ld hl, (kq_addr)            ; reset source
     inc hl                      ; skip over mask
     inc hl                      ; skip over read pointer
     inc hl                      ; skip over write pointer
@@ -222,7 +222,7 @@ rbrm_end:
     pop af                      ; restore the read pointer
     inc a                       ; increment the read pointer
     and c                       ; mask it to wrap
-    ld hl, kq_addr              ; set destination
+    ld hl, (kq_addr)            ; set destination
     inc hl                      ; skip over mask
     ld (hl), a                  ; save the incremented read pointer
     inc hl                      ; skip over write pointer

@@ -1,7 +1,7 @@
 >DIAG "---- TESTING SPACE ----"
 >DIAG "Space of an empty queue"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
 main:
     call rb_space
@@ -16,10 +16,10 @@ main:
 
 >DIAG "Space of a full queue"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
     ; set the write pointer
-    ld hl, kq_addr
+    ld hl, (kq_addr)
     inc hl
     inc hl
     ld a, 0x0f
@@ -37,9 +37,9 @@ main:
 
 >DIAG "Space wrapped around the end"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
-    ld hl, kq_addr
+    ld hl, (kq_addr)
     inc hl
     ld a, 0x02
     ld (hl), a
@@ -59,9 +59,9 @@ main:
 
 >DIAG "Space more"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
-    ld hl, kq_addr
+    ld hl, (kq_addr)
     inc hl
     ld a, 0x0f
     ld (hl), a
@@ -81,9 +81,9 @@ main:
 
 >DIAG "Space more more more"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
-    ld hl, kq_addr
+    ld hl, (kq_addr)
     inc hl
     ld a, 0x03
     ld (hl), a
@@ -103,7 +103,7 @@ main:
 >DIAG "---- TESTING COUNT ----"
 >DIAG "Count of an empty queue"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
 main:
     call rb_count
@@ -118,10 +118,10 @@ main:
 
 >DIAG "Count of a full queue"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
     ; set the write pointer
-    ld hl, kq_addr
+    ld hl, (kq_addr)
     inc hl
     inc hl
     ld a, 0x0f
@@ -139,9 +139,9 @@ main:
 
 >DIAG "Count wrapped around the end"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
-    ld hl, kq_addr
+    ld hl, (kq_addr)
     inc hl
     ld a, 0x02
     ld (hl), a
@@ -161,9 +161,9 @@ main:
 
 >DIAG "Count more"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
-    ld hl, kq_addr
+    ld hl, (kq_addr)
     inc hl
     ld a, 0x0f
     ld (hl), a
@@ -183,9 +183,9 @@ main:
 
 >DIAG "Count more more more"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
-    ld hl, kq_addr
+    ld hl, (kq_addr)
     inc hl
     ld a, 0x03
     ld (hl), a

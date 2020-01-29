@@ -1,7 +1,7 @@
 >DIAG "---- TESTING WRITES ----"
 >DIAG "Push one byte into the buffer"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
 main:
     ld c, 0xaf
@@ -20,7 +20,7 @@ main:
 
 >DIAG "Push 2 items into the ring buffer"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
 main:
     ld c, 0xaf
@@ -43,11 +43,11 @@ main:
 
 >DIAG "Push 1 item into the ring buffer when its almost full"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
 main:
     ; set up the pointers
-    ld hl, kq_addr
+    ld hl, (kq_addr)
     inc hl
     ld a, 0x00
     ld (hl), a
@@ -84,11 +84,11 @@ loop:
 
 >DIAG "Fail to insert byte when write pointer is 14"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
 main:
     ; set up the pointers
-    ld hl, kq_addr
+    ld hl, (kq_addr)
     inc hl
     ld a, 0x00
     ld (hl), a
@@ -126,11 +126,11 @@ loop:
 
 >DIAG "Insert byte when write pointer is 15 and read is 1"
 >RESET
->INCLUDE "init_16_buf.asm"
+>INCLUDE "init.asm"
 >CODE
 main:
     ; set up the pointers
-    ld hl, kq_addr
+    ld hl, (kq_addr)
     inc hl
     ld a, 0x01
     ld (hl), a
