@@ -1,0 +1,15 @@
+>DIAG "---- TESTING FINDS ----"
+>DIAG "Get the address of the end of the queue list"
+>RESET
+>INCLUDE "init.asm"
+>CODE
+main:
+    call ql_end_addr
+
+    halt
+
+>INCLUDE "../05-queuelist.asm"
+>RUN
+>REG HL 0x0313 "Return code is end of the queue list"
+
+
