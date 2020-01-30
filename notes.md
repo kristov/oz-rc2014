@@ -109,3 +109,38 @@ Size: 32 bytes
 * If not look up the consumer function environment and enable it
 * Call the consumer function
 
+## Boot seq
+
+; Boot sequence:
+;
+;   1) Create proc start queue
+;   2) Create stdin and stdout queues
+;   3) Connect kernel func caller to proc start queue consumer
+;   4) Push SIO driver init function to proc start queue
+;   5) Push init function of "echo" driver to proc start queue
+;   6) Push init function of shell to proc start queue
+;   7) Enter kernel queue loop
+;
+;   Init function of SIO driver:
+;       1) Init serial device
+;       2) Connect producer function of SIO driver (dummy) to stdin
+;       3) Connect consumer function of SIO writer to stdout
+;       (Consumer of stdin is free, producer of stdout is free)
+;
+;   Init function of "echo" driver
+;       1) Connect consumer function to stdin
+;       2) Connect producer function to stdout
+;       (Echo driver copies bytes from consumer queue to producer)
+;
+;   Init function of shell
+;       1) Create line buffer in memory
+;       2) Connect consumer function to stdin
+;       3) Connect producer function to stdout
+;
+; `echo "blah" | func1`
+;
+;   * Echo not connected to stdin - remains with shell
+;
+; Program launch:
+;   1) Launcher
+
