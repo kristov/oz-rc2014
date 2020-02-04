@@ -1,15 +1,74 @@
->DIAG "---- TESTING FINDS ----"
->DIAG "Get the address of the end of the queue list"
+>DIAG "---- TESTING SETS ----"
+>DIAG "Initialize a new set"
 >RESET
->INCLUDE "init.asm"
 >CODE
 main:
-    call ql_end_addr
+    ld hl, 0x0400
+    push hl
+    call ql_set_init
+    pop hl
 
     halt
 
 >INCLUDE "../05-queuelist.asm"
 >RUN
->REG HL 0x0313 "Return code is end of the queue list"
+>MEM 0x0400 "Set initialized correctly"
+0x00 0x80
+
+
+>DIAG "Append to set"
+>RESET
+>CODE
+main:
+    ; create a new empty set
+    ld hl, 0x0400
+    push hl
+    call ql_set_init
+    pop hl
+
+    ; append 5 bytes of space
+    ld hl, 0x0400
+    push hl
+    ld hl, 0x0005
+    push hl
+    call ql_set_append
+    pop de
+    pop de
+
+    halt
+
+>INCLUDE "../05-queuelist.asm"
+>RUN
+REG HL 0x0405 "Return address correct"
+>MEM 0x0400 "Set appended correctly"
+0x05 0x80
+
+
+>DIAG "Fail to put something too big on the set"
+>RESET
+>CODE
+main:
+    ; create a new empty set
+    ld hl, 0x0400
+    push hl
+    call ql_set_init
+    pop hl
+
+    ; append lots of bytes of space
+    ld hl, 0x0400
+    push hl
+    ld hl, 0xffff
+    push hl
+    call ql_set_append
+    pop de
+    pop de
+
+    halt
+
+>INCLUDE "../05-queuelist.asm"
+>RUN
+REG HL 0x0000 "Return address correctly NULL"
+>MEM 0x0400 "Set left unmodified correctly"
+0x00 0x80
 
 
