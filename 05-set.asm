@@ -19,20 +19,18 @@ ql_set_init:
 ql_chunk_init:
     ld hl, 0x0002               ; prepare hl to extract argument on the stack
     add hl, sp                  ; skip over return address on stack
-
     ; load the desired space value into bc and make sure its not too large
     ld c, (hl)                  ; load the size address L
     inc hl                      ; skip over L
     ld b, (hl)                  ; load the size address U
     bit 7, b                    ; test if the size is too big
     jp nz, qlci_error           ; the size is too big
-
     ; load the chunk address from stack argument
     inc hl                      ; skip over U
     ld e, (hl)                  ; load the dest address L
     inc hl                      ; skip over L
     ld d, (hl)                  ; load the dest address U
-
+    ; write the set header
     ex de, hl                   ; set hl to destination address
     ld (hl), c                  ; load the type L
     inc hl                      ; move to U
@@ -52,7 +50,6 @@ qlci_error:
 ql_set_append:
     ld hl, 0x0002               ; prepare hl to extract argument on the stack
     add hl, sp                  ; skip over return address on stack
-
     ; load the desired space value into bc and make sure its not too large
     ld c, (hl)                  ; load the size address L
     inc hl                      ; skip over L
@@ -60,7 +57,6 @@ ql_set_append:
     bit 7, b                    ; test if the size is too big
     jp nz, qlsa_error           ; the size is too big
     inc hl                      ; skip over U
-
     ; load the set address from stack argument and load the current set size
     ld e, (hl)                  ; load the set address L
     inc hl                      ; skip over L
@@ -73,12 +69,10 @@ ql_set_append:
     and d                       ; mask away the set type bit
     ld d, a                     ; de now contains the current size
     push de                     ; save original size
-
     ; add the desired size to current size in set and check if too big
     ex de, hl                   ; de is address of upper byte of set size, hl is current size
     add hl, bc                  ; hl is the new size
     jp c, qlsa_pop_error        ; new size too big
-
     ; write the new size to the set header making sure the set bit is on
     ex de, hl                   ; de is the new size, hl is is pointing to high byte
     dec hl                      ; decrement hl to low byte of set size
@@ -89,7 +83,6 @@ ql_set_append:
     ld (hl), e                  ; save the new size L
     inc hl                      ; skip over L
     ld (hl), d                  ; save the new size U
-
     ; add the old set size to the set data address to get end of the set
     inc hl                      ; hl is now the start of the chunk data
     pop de                      ; load the old size into de
@@ -161,7 +154,6 @@ qlga_zero:
 ql_get_end_addr:
     ld hl, 0x0002               ; prepare hl to extract argument on the stack
     add hl, sp                  ; skip over return address on stack
-
     ; load the set address from stack argument and load the current set size
     ld e, (hl)                  ; load the set address L
     inc hl                      ; skip over L
@@ -175,7 +167,6 @@ ql_get_end_addr:
     ld d, 0x7f                  ; prepare to mask away the set type bit
     and d                       ; mask away the set type bit
     ld d, a                     ; de now contains the current size
-
     ; add the set size to the set data address
     add hl, de                  ; hl is now the end of the set
     ret
