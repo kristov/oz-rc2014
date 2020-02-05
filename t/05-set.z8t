@@ -120,4 +120,152 @@ main:
 >RUN
 >REG HL 0x0407 "Set end address correct"
 
+>DIAG "Init a chunk in a set"
+>RESET
+>CODE
+main:
+    ; create a new empty set
+    ld hl, 0x0400
+    push hl
+    call ql_set_init
+    pop de
+
+    ; append 5 bytes of space
+    ld hl, 0x0400
+    push hl
+    ld hl, 0x0005
+    push hl
+    call ql_set_append
+    pop de
+    pop de
+
+    ; init a chunk
+    push hl
+    ld hl, 0x0003
+    push hl
+    call ql_chunk_init
+    pop de
+
+    ld (hl), 0xaa
+    inc hl
+    ld (hl), 0xaa
+    inc hl
+    ld (hl), 0xaa
+
+>INCLUDE "../05-set.asm"
+>RUN
+>MEM 0x0400 "Memory looks setup right"
+0x05 0x80 0x03 0x00 0xaa 0xaa 0xaa
+
+>DIAG "Get address of a set item with idx 0"
+>RESET
+>CODE
+main:
+    ld hl, 0x0400
+    push hl
+    call ql_set_init
+    pop de
+
+
+    ; append 5 bytes of space
+    ld hl, 0x0400
+    push hl
+    ld hl, 0x0005
+    push hl
+    call ql_set_append
+    pop de
+    pop de
+
+    ld hl, 0x0400
+    push hl
+    ld hl, 0x0000
+    push hl
+    call ql_get_addr
+
+    halt
+
+>INCLUDE "../05-set.asm"
+>RUN
+>REG HL 0x0402 "Set idx 0 address correct"
+
+
+>DIAG "Get address of a set item with idx 1"
+>RESET
+>CODE
+main:
+    ld hl, 0x0400
+    push hl
+    call ql_set_init
+    pop de
+
+    ; append 5 bytes of space
+    ld hl, 0x0400
+    push hl
+    ld hl, 0x0005
+    push hl
+    call ql_set_append
+    pop de
+    pop de
+
+    ; init a chunk
+    push hl
+    ld hl, 0x0003
+    push hl
+    call ql_chunk_init
+    pop de
+    ld (hl), 0xaa
+    inc hl
+    ld (hl), 0xaa
+    inc hl
+    ld (hl), 0xaa
+
+    ; append 3 bytes of space
+    ld hl, 0x0400
+    push hl
+    ld hl, 0x0003
+    push hl
+    call ql_set_append
+    pop de
+    pop de
+
+    ; init a chunk
+    push hl
+    ld hl, 0x0001
+    push hl
+    call ql_chunk_init
+    pop de
+    ld (hl), 0xbb
+
+    ; append 6 bytes of space
+    ld hl, 0x0400
+    push hl
+    ld hl, 0x0006
+    push hl
+    call ql_set_append
+    pop de
+    pop de
+
+    ; init a chunk
+    push hl
+    ld hl, 0x0004
+    push hl
+    call ql_chunk_init
+    pop de
+    ld (hl), 0xcc
+    inc hl
+    ld (hl), 0xcc
+    inc hl
+    ld (hl), 0xcc
+    inc hl
+    ld (hl), 0xcc
+
+    halt
+
+>INCLUDE "../05-set.asm"
+>RUN
+>MEM 0x0400 "Memory looks ok"
+0x0e 0x80
+    0x03 0x00 0xaa 0xaa 0xaa
+    0x01 0x00 0xbb
+    0x04 0x00 0xcc 0xcc 0xcc 0xcc
 

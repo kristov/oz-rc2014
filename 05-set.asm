@@ -12,10 +12,41 @@ ql_set_init:
     ld (hl), 0x80               ; set the bit to represent a set
     ret
 
+; Init a chunk of a given size at the location passed
+;
+;     ql_chunk_init(uint16_t chunk, uint16_t size);
+;
+ql_chunk_init:
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
+    add hl, sp                  ; skip over return address on stack
+
+    ; load the desired space value into bc and make sure its not too large
+    ld c, (hl)                  ; load the size address L
+    inc hl                      ; skip over L
+    ld b, (hl)                  ; load the size address U
+    bit 7, b                    ; test if the size is too big
+    jp nz, qlci_error           ; the size is too big
+
+    ; load the chunk address from stack argument
+    inc hl                      ; skip over U
+    ld e, (hl)                  ; load the dest address L
+    inc hl                      ; skip over L
+    ld d, (hl)                  ; load the dest address U
+
+    ex de, hl                   ; set hl to destination address
+    ld (hl), c                  ; load the type L
+    inc hl                      ; move to U
+    ld (hl), b                  ; set the bit to represent a chunk
+    inc hl                      ; move to start of chunk data
+    ret
+qlci_error:
+    ld hl, 0x0000               ; set error code
+    ret
+
 ; ql_set_append(uint16_t set, uint16_t size);
 ;
 ;     ld bc, <set address>           ; push the address of the set
-;     ld de, <size of thing to add>  ; push the size of the chunk
+;     ld de, <size of thing to add>  ; push the size of the chunk (header + data)
 ;     call ql_set_append             ; returns the address of where the chunk data starts in hl
 ;
 ql_set_append:
@@ -90,21 +121,27 @@ ql_get_addr:
     ld d, (hl)                  ; load the set address U
     ex de, hl                   ; set hl to set address, de is stack location
 
-qlga_test_bc:
-    ; keep adding the chunk sizes and decrementing bc until zero
-    or b                        ; test b for zero
+qlga_nextc:
+    ld e, (hl)                  ; load the chunk size L
+    inc hl                      ; skip over L
+    ld a, (hl)                  ; load the U into a
+    inc hl                      ; skip over U
+    ld d, 0x7f                  ; prepare to mask away the set type bit
+    and d                       ; mask away the set type bit
+    ld d, a                     ; de now contains the current size
+
+    ; test decremented bc for zero
+    ld a, b                     ; prepare to test zero
+    or a                        ; test for zero
     jp nz, qlga_nzero           ; not zero
-    or c                        ; test c for zero
+    ld a, c                     ; prepare to test zero
+    or a                        ; test for zero
     jp nz, qlga_nzero           ; not zero
     jp qlga_zero                ; bc is zero, we have arrived
 qlga_nzero:
-    ld e, (hl)                  ; load the chunk size L
-    inc hl                      ; skip over L
-    ld d, (hl)                  ; load the chunk size U
-    inc hl                      ; skip over U
     add hl, de                  ; add the chunk size to pointer
     dec bc                      ; decrement the idx
-    jp qlga_test_bc             ; test bc for zero-ness
+    jp qlga_nextc               ; next chunk
 qlga_zero:
     ret
 
