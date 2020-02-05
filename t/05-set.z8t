@@ -138,14 +138,12 @@ main:
     call ql_set_append
     pop de
     pop de
-
     ; init a chunk
     push hl
     ld hl, 0x0003
     push hl
     call ql_chunk_init
     pop de
-
     ld (hl), 0xaa
     inc hl
     ld (hl), 0xaa
@@ -189,7 +187,7 @@ main:
 >REG HL 0x0402 "Set idx 0 address correct"
 
 
->DIAG "Get address of a set item with idx 1"
+>DIAG "Multi-chunk appending and setting data"
 >RESET
 >CODE
 main:
