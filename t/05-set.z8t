@@ -10,7 +10,7 @@ main:
 
     halt
 
->INCLUDE "../05-queuelist.asm"
+>INCLUDE "../05-set.asm"
 >RUN
 >MEM 0x0400 "Set initialized correctly"
 0x00 0x80
@@ -37,7 +37,7 @@ main:
 
     halt
 
->INCLUDE "../05-queuelist.asm"
+>INCLUDE "../05-set.asm"
 >RUN
 >REG HL 0x0402 "Return address correct"
 >MEM 0x0400 "Set appended correctly"
@@ -65,7 +65,7 @@ main:
 
     halt
 
->INCLUDE "../05-queuelist.asm"
+>INCLUDE "../05-set.asm"
 >RUN
 >REG HL 0x0000 "Return address correctly NULL"
 >MEM 0x0400 "Set left unmodified correctly"
@@ -87,7 +87,7 @@ main:
 
     halt
 
->INCLUDE "../05-queuelist.asm"
+>INCLUDE "../05-set.asm"
 >RUN
 >REG HL 0x0402 "Set end address correct"
 
@@ -116,7 +116,7 @@ main:
     call ql_get_end_addr
     halt
 
->INCLUDE "../05-queuelist.asm"
+>INCLUDE "../05-set.asm"
 >RUN
 >REG HL 0x0407 "Set end address correct"
 
