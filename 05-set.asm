@@ -108,19 +108,26 @@ qlsa_error:
 ql_get_addr:
     ld hl, 0x0002               ; prepare hl to extract argument on the stack
     add hl, sp                  ; skip over return address on stack
-
     ; load the desired idx into bc
     ld c, (hl)                  ; load the idx L
     inc hl                      ; skip over L
     ld b, (hl)                  ; load the idx U
     inc hl                      ; skip over U
-
     ; load the set address from stack argument
     ld e, (hl)                  ; load the set address L
     inc hl                      ; skip over L
     ld d, (hl)                  ; load the set address U
     ex de, hl                   ; set hl to set address, de is stack location
-
+    inc hl                      ; skip over set header L
+    inc hl                      ; skip over set header U
+    ; test bc for zero
+    ld a, b                     ; prepare to test zero
+    or a                        ; test for zero
+    jp nz, qlga_nextc           ; not zero
+    ld a, c                     ; prepare to test zero
+    or a                        ; test for zero
+    jp nz, qlga_nextc           ; not zero
+    jp qlga_zero                ; bc is zero, we have arrived
 qlga_nextc:
     ld e, (hl)                  ; load the chunk size L
     inc hl                      ; skip over L
@@ -129,7 +136,6 @@ qlga_nextc:
     ld d, 0x7f                  ; prepare to mask away the set type bit
     and d                       ; mask away the set type bit
     ld d, a                     ; de now contains the current size
-
     ; test decremented bc for zero
     ld a, b                     ; prepare to test zero
     or a                        ; test for zero
@@ -137,11 +143,14 @@ qlga_nextc:
     ld a, c                     ; prepare to test zero
     or a                        ; test for zero
     jp nz, qlga_nzero           ; not zero
-    jp qlga_zero                ; bc is zero, we have arrived
+    jp qlga_zero_rwd            ; bc is zero, we have arrived
 qlga_nzero:
     add hl, de                  ; add the chunk size to pointer
     dec bc                      ; decrement the idx
     jp qlga_nextc               ; next chunk
+qlga_zero_rwd:
+    dec hl                      ; rewind hl
+    dec hl                      ; rewind hl
 qlga_zero:
     ret
 
