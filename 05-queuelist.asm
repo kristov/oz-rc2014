@@ -12,7 +12,7 @@ ql_set_init:
     ld (hl), 0x80               ; set the bit to represent a set
     ret
 
-; ql_set_append(set, size);
+; ql_set_append(uint16_t set, uint16_t size);
 ;
 ;     ld bc, <set address>           ; push the address of the set
 ;     ld de, <size of thing to add>  ; push the size of the chunk
@@ -68,4 +68,68 @@ qlsa_pop_error:
     pop de                      ; discard the original size
 qlsa_error:
     ld hl, 0x0000               ; returns NULL
+    ret
+
+; Get the address for a given idx in a set
+;
+;     ql_get_addr(uint16_t set, uint16_t idx);
+;
+ql_get_addr:
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
+    add hl, sp                  ; skip over return address on stack
+
+    ; load the desired idx into bc
+    ld c, (hl)                  ; load the idx L
+    inc hl                      ; skip over L
+    ld b, (hl)                  ; load the idx U
+    inc hl                      ; skip over U
+
+    ; load the set address from stack argument
+    ld e, (hl)                  ; load the set address L
+    inc hl                      ; skip over L
+    ld d, (hl)                  ; load the set address U
+    ex de, hl                   ; set hl to set address, de is stack location
+
+qlga_test_bc:
+    ; keep adding the chunk sizes and decrementing bc until zero
+    or b                        ; test b for zero
+    jp nz, qlga_nzero           ; not zero
+    or c                        ; test c for zero
+    jp nz, qlga_nzero           ; not zero
+    jp qlga_zero                ; bc is zero, we have arrived
+qlga_nzero:
+    ld e, (hl)                  ; load the chunk size L
+    inc hl                      ; skip over L
+    ld d, (hl)                  ; load the chunk size U
+    inc hl                      ; skip over U
+    add hl, de                  ; add the chunk size to pointer
+    dec bc                      ; decrement the idx
+    jp qlga_test_bc             ; test bc for zero-ness
+qlga_zero:
+    ret
+
+; Get the address of the end of a set
+;
+;     ql_get_end_addr(uint16_t set);
+;
+ql_get_end_addr:
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
+    add hl, sp                  ; skip over return address on stack
+
+    ; load the set address from stack argument and load the current set size
+    ld e, (hl)                  ; load the set address L
+    inc hl                      ; skip over L
+    ld d, (hl)                  ; load the set address U
+    inc hl                      ; skip over U
+    ex de, hl                   ; set hl to set address, de is stack location
+    ld e, (hl)                  ; load the lower of the size
+    inc hl                      ; skip over L
+    ld a, (hl)                  ; load the U into a
+    inc hl                      ; skip over U
+    ld d, 0x7f                  ; prepare to mask away the set type bit
+    and d                       ; mask away the set type bit
+    ld d, a                     ; de now contains the current size
+
+    ; add the set size to the set data address
+    add hl, de                  ; hl is now the end of the set
     ret

@@ -39,7 +39,7 @@ main:
 
 >INCLUDE "../05-queuelist.asm"
 >RUN
-REG HL 0x0405 "Return address correct"
+>REG HL 0x0402 "Return address correct"
 >MEM 0x0400 "Set appended correctly"
 0x05 0x80
 
@@ -67,8 +67,57 @@ main:
 
 >INCLUDE "../05-queuelist.asm"
 >RUN
-REG HL 0x0000 "Return address correctly NULL"
+>REG HL 0x0000 "Return address correctly NULL"
 >MEM 0x0400 "Set left unmodified correctly"
 0x00 0x80
+
+
+>DIAG "Get end address of an empty set"
+>RESET
+>CODE
+main:
+    ld hl, 0x0400
+    push hl
+    call ql_set_init
+    pop de
+
+    ld hl, 0x0400
+    push hl
+    call ql_get_end_addr
+
+    halt
+
+>INCLUDE "../05-queuelist.asm"
+>RUN
+>REG HL 0x0402 "Set end address correct"
+
+
+>DIAG "End address correct for appended set"
+>RESET
+>CODE
+main:
+    ; create a new empty set
+    ld hl, 0x0400
+    push hl
+    call ql_set_init
+    pop de
+
+    ; append 5 bytes of space
+    ld hl, 0x0400
+    push hl
+    ld hl, 0x0005
+    push hl
+    call ql_set_append
+    pop de
+    pop de
+
+    ld hl, 0x0400
+    push hl
+    call ql_get_end_addr
+    halt
+
+>INCLUDE "../05-queuelist.asm"
+>RUN
+>REG HL 0x0407 "Set end address correct"
 
 
