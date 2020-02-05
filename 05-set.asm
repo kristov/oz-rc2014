@@ -170,3 +170,33 @@ ql_get_end_addr:
     ; add the set size to the set data address
     add hl, de                  ; hl is now the end of the set
     ret
+
+; Delete a chunk from a set
+;
+;     ql_set_delete(uint16_t set, uint16_t idx);
+;
+ql_set_delete:
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
+    add hl, sp                  ; skip over return address on stack
+    ; load the desired idx into bc
+    ld c, (hl)                  ; load the idx L
+    inc hl                      ; skip over L
+    ld b, (hl)                  ; load the idx U
+    inc hl                      ; skip over U
+    ; load the set address from stack argument
+    ld e, (hl)                  ; load the set address L
+    inc hl                      ; skip over L
+    ld d, (hl)                  ; load the set address U
+    inc hl                      ; skip over U
+    ; get the address of the idx+1 and the address of end of set
+    push de                     ; push set address
+    inc bc                      ; look for the start of the next chunk
+    push bc                     ; push idx+1
+    call ql_get_addr            ; get the address of the chunk index
+    pop bc                      ; discard idx
+    push hl                     ; save the chunk address
+    call ql_get_end_addr        ; get the end address of the set
+    pop bc                      ; discard set address
+    pop de                      ; pop the chunk address into de
+    ; subtract de from hl to get number of bytes
+    ret
