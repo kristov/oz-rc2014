@@ -188,15 +188,43 @@ ql_set_delete:
     inc hl                      ; skip over L
     ld d, (hl)                  ; load the set address U
     inc hl                      ; skip over U
-    ; get the address of the idx+1 and the address of end of set
-    push de                     ; push set address
-    inc bc                      ; look for the start of the next chunk
-    push bc                     ; push idx+1
-    call ql_get_addr            ; get the address of the chunk index
-    pop bc                      ; discard idx
-    push hl                     ; save the chunk address
+    push de                     ; save the set address
+    ; get the address of the idx'th chunk
+    push de                     ; push set address arg
+    push bc                     ; push idx arg
+    call ql_get_addr            ; get the address of the chunk
+    pop bc                      ; discard arg
+    pop de                      ; discard arg
+    ; check hl for NULL
+    push hl                     ; save the address of the chunk
+    ; get the end address of the set
+    push de                     ; push set address arg
     call ql_get_end_addr        ; get the end address of the set
-    pop bc                      ; discard set address
-    pop de                      ; pop the chunk address into de
-    ; subtract de from hl to get number of bytes
+    pop de                      ; discard arg
+    ; check hl for NULL
+    ex de, hl                   ; de is set end address, hl set address
+    ; calculate length of data to copy
+    pop hl                      ; pop address of the chunk
+    push hl                     ; save the address of the chunk
+    ld c, (hl)                  ; load the chunk size L
+    inc hl                      ; skip over L
+    ld b, (hl)                  ; load the chunk size U
+    inc hl                      ; skip over U
+    add hl, bc                  ; hl is end of chunk
+    ex de, hl                   ; de is end of chunk, hl is set end address
+    sbc hl, de                  ; hl is length of copy
+    ; prepare and execute the block copy
+    ld c, l                     ; copy hl L
+    ld b, h                     ; copy hl U
+    ex de, hl                   ; hl is end of chunk, de is the copy length
+    pop de                      ; restore the address of the chunk
+    push bc                     ; save the length
+    ldir                        ; copy bc bytes from hl to de
+    ; write the new length to the set header
+    pop bc                      ; restore the length
+    pop hl                      ; restore the set address
+    ; write (curr length - bc)
+    ret
+qlsd_error:
+    ld hl, 0xffff
     ret
