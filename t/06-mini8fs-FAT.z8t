@@ -1,0 +1,271 @@
+>DIAG "---- TESTING MINI8FS FAT TABLE ----"
+>RESET
+>CODE
+main:
+    ld hl, m8_base
+    ld (hl), 0x00
+    call m8_blk_find_free
+
+>INCLUDE "../06-mini8fs.asm"
+>RUN
+>REG HL 0x0000 "found empty entry at 0"
+
+
+>RESET
+>CODE
+main:
+    ld hl, m8_base
+    ld b, 0xff
+load_loop:
+    ld (hl), 0x01
+    inc hl
+    djnz load_loop
+    ld (hl), 0x01
+    call m8_blk_find_free
+
+>INCLUDE "../06-mini8fs.asm"
+>RUN
+>REG HL 0xffff "error code for full table"
+
+
+>RESET
+>CODE
+main:
+    ld hl, m8_base
+    ld (hl), 0x01
+    inc hl
+    ld (hl), 0x02
+    inc hl
+    ld (hl), 0x03
+    call m8_blk_find_free
+
+>INCLUDE "../06-mini8fs.asm"
+>RUN
+>REG HL 0x0003 "found empty entry at 3"
+
+
+>RESET
+>CODE
+main:
+    ld hl, m8_base
+    ld (hl), 0x01
+    inc hl
+    ld (hl), 0x00
+    inc hl
+    ld (hl), 0x03
+    call m8_blk_find_free
+
+>INCLUDE "../06-mini8fs.asm"
+>RUN
+>REG HL 0x0001 "found empty in middle"
+
+
+>RESET
+>CODE
+main:
+    ld a, 0x68
+    ld (0x0400), a
+    ld a, 0x65
+    ld (0x0400), a
+    ld a, 0x6c
+    ld (0x0400), a
+    ld a, 0x6f
+    ld (0x0400), a
+
+    ld a, 0x68
+    ld (0x0500), a
+    ld a, 0x65
+    ld (0x0500), a
+    ld a, 0x6c
+    ld (0x0500), a
+    ld a, 0x6f
+    ld (0x0500), a
+
+    ld hl, 0x0400
+    push hl
+    ld hl, 0x0500
+    push hl
+    call m8_namecmp
+
+>INCLUDE "../06-mini8fs.asm"
+>RUN
+>REG HL 0x0000 "text equals"
+
+
+>RESET
+>CODE
+main:
+    ld a, 0x68
+    ld (0x0400), a
+    ld a, 0x65
+    ld (0x0401), a
+    ld a, 0x6c
+    ld (0x0402), a
+    ld a, 0x6f
+    ld (0x0403), a
+
+    ld a, 0x6c
+    ld (0x0500), a
+    ld a, 0x68
+    ld (0x0501), a
+    ld a, 0x65
+    ld (0x0502), a
+    ld a, 0x6f
+    ld (0x0503), a
+
+    ld hl, 0x0400
+    push hl
+    ld hl, 0x0500
+    push hl
+    call m8_namecmp
+
+>INCLUDE "../06-mini8fs.asm"
+>RUN
+>REG HL 0xffff "text does not equal"
+
+
+>RESET
+>CODE
+main:
+    ld hl, 0x0400
+    ld (hl), 0x68
+    inc hl
+    ld (hl), 0x65
+    inc hl
+    ld (hl), 0x6c
+    inc hl
+    ld (hl), 0x6f
+    inc hl
+    ld (hl), 0x00
+    inc hl
+    ld (hl), 0x00
+    inc hl
+    ld (hl), 0xff
+    inc hl
+    ld (hl), 0xff
+    inc hl
+
+    ld hl, 0x0500
+    ld (hl), 0x68
+    inc hl
+    ld (hl), 0x65
+    inc hl
+    ld (hl), 0x6c
+    inc hl
+    ld (hl), 0x6f
+    inc hl
+    ld (hl), 0x00
+    inc hl
+    ld (hl), 0x00
+
+    ld hl, 0x0400
+    push hl
+    ld hl, 0x0500
+    push hl
+    call m8_blk_find
+
+>INCLUDE "../06-mini8fs.asm"
+>RUN
+>REG HL 0x0400 "found first entry correctly"
+
+
+>RESET
+>CODE
+main:
+    ld hl, 0x0400
+    ld b, 0x08
+test_loop:
+    ld (hl), 0xff
+    inc hl
+    djnz test_loop
+
+    ld (hl), 0x68
+    inc hl
+    ld (hl), 0x65
+    inc hl
+    ld (hl), 0x6c
+    inc hl
+    ld (hl), 0x6f
+    inc hl
+    ld (hl), 0x00
+    inc hl
+    ld (hl), 0x00
+    inc hl
+    ld (hl), 0xff
+    inc hl
+    ld (hl), 0xff
+    inc hl
+
+    ld hl, 0x0500
+    ld (hl), 0x68
+    inc hl
+    ld (hl), 0x65
+    inc hl
+    ld (hl), 0x6c
+    inc hl
+    ld (hl), 0x6f
+    inc hl
+    ld (hl), 0x00
+    inc hl
+    ld (hl), 0x00
+
+    ld hl, 0x0400
+    push hl
+    ld hl, 0x0500
+    push hl
+    call m8_blk_find
+
+>INCLUDE "../06-mini8fs.asm"
+>RUN
+>REG HL 0x0408 "found second entry correctly"
+
+
+>RESET
+>CODE
+main:
+    ld hl, 0x0400
+    ld b, 0x10
+test_loop:
+    ld (hl), 0xff
+    inc hl
+    djnz test_loop
+
+    ld (hl), 0x68
+    inc hl
+    ld (hl), 0x65
+    inc hl
+    ld (hl), 0x6c
+    inc hl
+    ld (hl), 0x6f
+    inc hl
+    ld (hl), 0x00
+    inc hl
+    ld (hl), 0x00
+    inc hl
+    ld (hl), 0xff
+    inc hl
+    ld (hl), 0xff
+    inc hl
+
+    ld hl, 0x0500
+    ld (hl), 0x68
+    inc hl
+    ld (hl), 0x65
+    inc hl
+    ld (hl), 0x6c
+    inc hl
+    ld (hl), 0x6f
+    inc hl
+    ld (hl), 0x00
+    inc hl
+    ld (hl), 0x00
+
+    ld hl, 0x0400
+    push hl
+    ld hl, 0x0500
+    push hl
+    call m8_blk_find
+
+>INCLUDE "../06-mini8fs.asm"
+>RUN
+>REG HL 0x0410 "found third entry correctly"
