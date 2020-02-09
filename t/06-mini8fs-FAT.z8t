@@ -297,3 +297,24 @@ main:
 >INCLUDE "../06-mini8fs.asm"
 >RUN
 >REG HL 0x0002 "found block id 2"
+
+>RESET
+>CODE
+main:
+    ld c, 0x00
+    push bc
+    call m8_blk_addr
+>INCLUDE "../06-mini8fs.asm"
+>RUN
+>REG HL 0x0600 "address of block 0 correct"
+
+
+>RESET
+>CODE
+main:
+    ld c, 0x02
+    push bc
+    call m8_blk_addr
+>INCLUDE "../06-mini8fs.asm"
+>RUN
+>REG HL 0x0680 "address of block 2 correct"
