@@ -85,6 +85,8 @@ main:
     push hl
     ld hl, 0x0500
     push hl
+    ld c, 0x04
+    push bc
     call m8_namecmp
 
 >INCLUDE "../06-mini8fs.asm"
@@ -117,6 +119,8 @@ main:
     push hl
     ld hl, 0x0500
     push hl
+    ld c, 0x04
+    push bc
     call m8_namecmp
 
 >INCLUDE "../06-mini8fs.asm"
@@ -162,6 +166,8 @@ main:
     push hl
     ld hl, 0x0500
     push hl
+    ld c, 0x04
+    push bc
     call m8_blk_find
 
 >INCLUDE "../06-mini8fs.asm"
@@ -213,6 +219,8 @@ test_loop:
     push hl
     ld hl, 0x0500
     push hl
+    ld c, 0x04
+    push bc
     call m8_blk_find
 
 >INCLUDE "../06-mini8fs.asm"
@@ -264,6 +272,8 @@ test_loop:
     push hl
     ld hl, 0x0500
     push hl
+    ld c, 0x04
+    push bc
     call m8_blk_find
 
 >INCLUDE "../06-mini8fs.asm"
