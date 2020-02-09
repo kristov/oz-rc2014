@@ -279,3 +279,21 @@ test_loop:
 >INCLUDE "../06-mini8fs.asm"
 >RUN
 >REG HL 0x0410 "found third entry correctly"
+
+
+>RESET
+>CODE
+main:
+    ld hl, 0x0400
+    inc hl
+    inc hl
+    inc hl
+    ld a, 0x02
+    ld (hl), a
+    ld c, 0x01
+    push bc
+    call m8_blk_get_next
+
+>INCLUDE "../06-mini8fs.asm"
+>RUN
+>REG HL 0x0002 "found block id 2"

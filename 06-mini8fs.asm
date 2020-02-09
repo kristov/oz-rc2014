@@ -1,4 +1,5 @@
 m8_base: equ 0x0400
+m8_block_table_size: equ 0x0200
 m8_files_per_block: equ 0x08
 m8_file_entry_len: equ 0x08
 m8_file_name_len: equ 0x06
@@ -27,25 +28,52 @@ m8_bff_found:
     ld l, a
     ret
 
+; Find if there is a next block for the passed block
+;
+;     m8_blk_get_next(uint8_t blk_id);
+;
+m8_blk_get_next:
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
+    add hl, sp                  ; skip over return address on stack
+    ld b, 0x00                  ; zero id U
+    ld l, (hl)                  ; load block id
+    ld h, 0x00                  ; zero H
+    add hl, hl                  ; block table entries two bytes
+    ex de, hl                   ; free hl
+    ld hl, m8_base              ; load the block table addr
+    add hl, de                  ; hl is now the block table byte
+    inc hl                      ; skip to next block val
+    ld a, (hl)                  ; load the value
+    or a                        ; test for zero
+    jp z, m8_bgn_none           ; no further blocks
+    ld h, 0x00                  ; zero H
+    ld l, a                     ; set next block id
+    ret
+m8_bgn_none:
+    ld hl, 0x0000               ; no blocks found
+    ret
+
 ; Get memory address for block id
 ;
 m8_blk_addr:
     ld hl, 0x0002               ; prepare hl to extract argument on the stack
     add hl, sp                  ; skip over return address on stack
-    ld a, (hl)                  ; load the block id L
-    or a                        ; test for zero
+    ld l, (hl)                  ; load the block id L
+    ld h, 0x00                  ; zero U
+    or l                        ; test for zero
     jp z, m8_ba_skip            ; skip multiplying zero
-    add a, a                    ; x2
-    add a, a                    ; x4
-    add a, a                    ; x8
-    add a, a                    ; x16
-    add a, a                    ; x32
-    add a, a                    ; x64
+    add hl, hl                  ; x2
+    add hl, hl                  ; x4
+    add hl, hl                  ; x8
+    add hl, hl                  ; x16
+    add hl, hl                  ; x32
+    add hl, hl                  ; x64
 m8_ba_skip:
-    ld c, a                     ; copy to bc
-    ld b, 0x00                  ; zero high byte of bc
+    ex de, hl                   ; de computed offset
     ld hl, m8_base              ; load base address
-    add hl, bc                  ; add multiplied offset
+    ld bc, m8_block_table_size  ; set block table size
+    add hl, bc                  ; add block table offset
+    add hl, de                  ; add multiplied offset
     ret
 
 ; Compare a file name with another
