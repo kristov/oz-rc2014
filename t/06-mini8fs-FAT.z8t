@@ -301,6 +301,35 @@ main:
 >RESET
 >CODE
 main:
+    ; zero points to 2, 2 points to 1
+    ld hl, 0x0400
+    inc hl
+    ld a, 0x02 ; 0 points to 2
+    ld (hl), a
+    inc hl
+    inc hl
+    ld a, 0x00 ; 1 points nowhere
+    ld (hl), a
+    inc hl
+    inc hl
+    ld a, 0x01 ; 2 points to 1
+    ld (hl), a
+
+    ld c, 0x00
+    push bc
+    call m8_blk_get_next
+    ld c, l
+    push bc
+    call m8_blk_get_next
+
+>INCLUDE "../06-mini8fs.asm"
+>RUN
+>REG HL 0x0001 "complex get next"
+
+
+>RESET
+>CODE
+main:
     ld c, 0x00
     push bc
     call m8_blk_addr
