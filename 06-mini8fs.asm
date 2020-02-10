@@ -156,3 +156,63 @@ m8_bf_found:
     pop hl                      ; restore file entry address
     pop de                      ; restore the name pointer
     ret
+
+; Find a file entry from a chained block id
+;
+;     m8_blkc_find(uint8_t blockid, uint16_t name, uint8_t strlen);
+;
+m8_blkc_find:
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
+    add hl, sp                  ; skip over return address on stack
+    ; load the strlen
+    ld c, (hl)                  ; load strlen
+    inc hl                      ; skip over L
+    inc hl                      ; skip over H
+    ; load the desired file name from args
+    ld e, (hl)                  ; load the name L
+    inc hl                      ; skip over L
+    ld d, (hl)                  ; load the name U
+    inc hl                      ; skip over H
+    push de                     ; save name addr
+    ; load the block id from args and save it
+    ld e, (hl)                  ; load block id L
+    push de                     ; push block id arg
+    call m8_blk_addr            ; convert block id into block addr
+    pop de                      ; remove id from stack
+    ld b, e                     ; save block id
+    ex de, hl                   ; de block address, hl block id
+    pop hl                      ; restore name address
+    push de                     ; push block addr
+    push hl                     ; push name addr
+m8_bcf_checkblock:
+    ; search for the file name in the current block
+    push bc                     ; push strlen in c
+    call m8_blk_find            ; find the file in this block
+    pop bc                      ; restore bc
+    ; check if the block address was found
+    or l                        ; test l for non-zeroness
+    jp nz, m8_bcf_found         ; if non-zero something found
+    or h                        ; test h for non-zeroness
+    jp nz, m8_bcf_found         ; if non-zero something found
+    ; get the next block id in the chain
+    ld e, b                     ; set L of de to block id in b
+    push bc                     ; save bc for after call
+    push de                     ; push current block id in arg
+    call m8_blk_get_next        ; get next block id in chain
+    pop de                      ; discard de
+    ; check for the next chained block returned in l
+    or l                        ; check for zero block id
+    jp z, m8_bcf_retnull        ; no next block found
+    ; get the address of the next block
+    push hl                     ; push block id arg
+    call m8_blk_addr            ; convert block id into block addr
+    pop hl                      ; discard block id arg
+    pop bc                      ; restore saved strlen
+    ld b, l                     ; set block id to next one
+    jp m8_bcf_checkblock        ; rinse and repeat
+m8_bcf_retnull:
+    ld hl, 0x0000               ; return null address
+m8_bcf_found:
+    pop bc                      ; discard name addr
+    pop de                      ; discard block addr
+    ret
