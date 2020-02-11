@@ -184,14 +184,15 @@ m8_blkc_find:
     ld c, d                     ; restore strlen
     ex de, hl                   ; de block address, hl block id
     pop hl                      ; restore name address
-    push de                     ; push block addr
-    push hl                     ; push name addr
 m8_bcf_checkblock:
     ; search for the file name in the current block
+    push de                     ; push block addr
+    push hl                     ; push name addr
     push bc                     ; push strlen in c
     call m8_blk_find            ; find the file in this block
     pop bc                      ; restore bc
     ; check if the block address was found
+    ld a, 0x00                  ; zero a
     or l                        ; test l for non-zeroness
     jp nz, m8_bcf_found         ; if non-zero something found
     or h                        ; test h for non-zeroness
@@ -203,14 +204,18 @@ m8_bcf_checkblock:
     call m8_blk_get_next        ; get next block id in chain
     pop de                      ; discard de
     ; check for the next chained block returned in l
+    ld a, 0x00                  ; zero a
     or l                        ; check for zero block id
     jp z, m8_bcf_retnull        ; no next block found
     ; get the address of the next block
     push hl                     ; push block id arg
     call m8_blk_addr            ; convert block id into block addr
-    pop hl                      ; discard block id arg
+    pop de                      ; discard block id arg
     pop bc                      ; restore saved strlen
-    ld b, l                     ; set block id to next one
+    ld b, e                     ; set block id to next one
+    pop de                      ; restore name addr
+    pop af                      ; discard old block addr
+    ex de, hl                   ; hl is name addr, de is new block addr
     jp m8_bcf_checkblock        ; rinse and repeat
 m8_bcf_retnull:
     ld hl, 0x0000               ; return null address
