@@ -12,5 +12,5 @@ TESTS += 04-ringbuf-WRITEM.z8t
 all: $(TESTS)
 	$(Z8T) $(ASM) $(TESTS)
 
-test_fs.bin: test_fs.hex
-	xxd -r -p test_fs.hex test_fs.bin
+fsimg.bin: fsimg.hex
+	xxd -r -p fsimg.hex fsimg.bin

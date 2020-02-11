@@ -6,6 +6,6 @@ main:
 >INCLUDE "../06-mini8fs.asm"
 >CODE
 seek 0x0400
-incbin "test_fs.bin"
+incbin "fsimg.bin"
 >RUN
 >REG HL 0x0000 "found empty entry at 0"
