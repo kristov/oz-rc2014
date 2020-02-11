@@ -17,9 +17,6 @@ main:
     ld (hl), 0x67 ; g
     inc hl
     ld (hl), 0x00
-    inc hl
-    ld (hl), 0x00
-    inc hl
     ld hl, 0x0300
     push hl
 
@@ -33,3 +30,44 @@ seek 0x0400
 incbin "fsimg.bin"
 >RUN
 >REG HL 0x0608 "found second prog entry in root dir"
+
+
+>RESET
+>CODE
+main:
+    ; look in block zero
+    ld c, 0x00
+    push bc
+
+    ; look for "dev/stdio"
+    ld hl, 0x0300
+    ld (hl), 0x64 ; d
+    inc hl
+    ld (hl), 0x65 ; e
+    inc hl
+    ld (hl), 0x76 ; v
+    inc hl
+    ld (hl), 0x2f ; /
+    inc hl
+    ld (hl), 0x73 ; s
+    inc hl
+    ld (hl), 0x74 ; t
+    inc hl
+    ld (hl), 0x64 ; d
+    inc hl
+    ld (hl), 0x69 ; i
+    inc hl
+    ld (hl), 0x6f ; o
+    inc hl
+    ld (hl), 0x00
+    ld hl, 0x0300
+    push hl
+
+    call m8_path_find
+
+>INCLUDE "../06-mini8fs.asm"
+>CODE
+seek 0x0400
+incbin "fsimg.bin"
+>RUN
+>REG HL 0x0640 "found dev/stdio"

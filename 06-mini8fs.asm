@@ -218,3 +218,82 @@ m8_bcf_found:
     pop bc                      ; discard name addr
     pop de                      ; discard block addr
     ret
+
+; Find a file/dir entry for a path (null terminated), from a starting block id
+;
+;     m8_path_find(uint8_t blockid, uint16_t path);
+;
+m8_path_find:
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
+    add hl, sp                  ; skip over return address on stack
+    ; load the path from args
+    ld e, (hl)                  ; load path L
+    inc hl                      ; skip over L
+    ld d, (hl)                  ; load path U
+    inc hl                      ; skip over H
+    ; load the block id from args and save it
+    ld b, (hl)                  ; save block id L
+    ld c, 0x00                  ; zero counter
+    ld h, d                     ; set pointers equal
+    ld l, e                     ; set pointers equal
+m8_pf_nextc:
+    ld a, (hl)                  ; load the character
+    inc hl                      ; advance char pointer
+    cp m8_dir_separator         ; look for dir separator
+    jp z, m8_pf_sepfound        ; process the part
+    cp 0x00                     ; 
+    jp z, m8_pf_lstfound        ; process the last part
+    inc c
+    jp m8_pf_nextc              ; go to next char
+m8_pf_sepfound:
+    push hl                     ; save the end str address
+    ld l, b                     ; copy block id to l
+    push hl                     ; push block id arg
+    push de                     ; push string start
+    push bc                     ; push string length in c
+    call m8_blkc_find           ; find the path part
+    pop bc                      ; restore c
+    pop de                      ; restore string location
+    or l                        ; test l for non-zeroness
+    jp nz, m8_pf_pfound         ; if non-zero something found
+    or h                        ; test h for non-zeroness
+    jp nz, m8_pf_pfound         ; if non-zero something found
+    jp m8_pf_notfound           ; not found
+m8_pf_pfound:
+    ld b, 0x00                  ; prepare to add 6
+    ld c, 0x06                  ; prepare to add 6
+    add hl, bc                  ; skip over filename
+    ld a, (hl)                  ; grab the type byte
+    bit 7, a                    ; test the dir bit
+    jp z, m8_pf_notfound        ; these parts cant be files
+    inc hl                      ; advance to block id
+    ld b, (hl)                  ; save the block id of dir
+    pop hl                      ; discard block id
+    pop de                      ; restore final str address
+    ld h, d                     ; set pointers equal
+    ld l, e                     ; set pointers equal
+    ld c, 0x00                  ; zero char count
+    jp m8_pf_nextc              ; look for next part
+m8_pf_lstfound:
+    push hl                     ; save the end str address
+    ld l, b                     ; copy block id to l
+    push hl                     ; push block id arg
+    push de                     ; push string start
+    push bc                     ; push string length in c
+    call m8_blkc_find           ; find the path part
+    pop bc                      ; restore c
+    pop de                      ; restore string location
+    or l                        ; test l for non-zeroness
+    jp nz, m8_pf_ffound         ; if non-zero something found
+    or h                        ; test h for non-zeroness
+    jp nz, m8_pf_ffound         ; if non-zero something found
+    jp m8_pf_notfound           ; not found
+m8_pf_ffound:
+    pop de                      ; discard arg
+    pop de                      ; discard arg
+    ret
+m8_pf_notfound:
+    pop hl                      ; discard hl
+    pop hl                      ; discard hl
+    ld hl, 0x0000               ; not found
+    ret
