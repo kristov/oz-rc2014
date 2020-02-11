@@ -2,10 +2,34 @@
 >RESET
 >CODE
 main:
-    call m8_blk_find_free
+    ; look in block zero
+    ld c, 0x00
+    push bc
+
+    ; look for "prog" file (second)
+    ld hl, 0x0300
+    ld (hl), 0x70 ; p
+    inc hl
+    ld (hl), 0x72 ; r
+    inc hl
+    ld (hl), 0x6f ; o
+    inc hl
+    ld (hl), 0x67 ; g
+    inc hl
+    ld (hl), 0x00
+    inc hl
+    ld (hl), 0x00
+    inc hl
+    ld hl, 0x0300
+    push hl
+
+    ld l, 0x04
+    push hl
+    call m8_blkc_find
+
 >INCLUDE "../06-mini8fs.asm"
 >CODE
 seek 0x0400
 incbin "fsimg.bin"
 >RUN
->REG HL 0x0000 "found empty entry at 0"
+>REG HL 0x0608 "found second prog entry in root dir"

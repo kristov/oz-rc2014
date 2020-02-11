@@ -176,10 +176,12 @@ m8_blkc_find:
     push de                     ; save name addr
     ; load the block id from args and save it
     ld e, (hl)                  ; load block id L
+    ld d, c                     ; save strlen
     push de                     ; push block id arg
     call m8_blk_addr            ; convert block id into block addr
     pop de                      ; remove id from stack
     ld b, e                     ; save block id
+    ld c, d                     ; restore strlen
     ex de, hl                   ; de block address, hl block id
     pop hl                      ; restore name address
     push de                     ; push block addr
