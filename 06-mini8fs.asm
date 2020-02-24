@@ -7,6 +7,8 @@ m8_dir_separator: equ 0x2f
 
 ; Find a free block in the block table
 ;
+;     uint8_t m8_blk_find_free();
+;
 m8_blk_find_free:
     ld hl, m8_base
     ld b, 0xff
@@ -30,7 +32,7 @@ m8_bff_found:
 
 ; Find if there is a next block for the passed block
 ;
-;     m8_blk_get_next(uint8_t blk_id);
+;     uint8_t m8_blk_get_next(uint8_t blockid);
 ;
 m8_blk_get_next:
     ld hl, 0x0002               ; prepare hl to extract argument on the stack
@@ -55,6 +57,8 @@ m8_bgn_none:
 
 ; Get memory address for block id
 ;
+;     uint8_t* m8_blk_addr(uint8_t blockid);
+;
 m8_blk_addr:
     ld hl, 0x0002               ; prepare hl to extract argument on the stack
     add hl, sp                  ; skip over return address on stack
@@ -77,6 +81,8 @@ m8_ba_skip:
     ret
 
 ; Compare a file name with another
+;
+;     uint8_t m8_namecmp(uint8_t* str1, uint8_t* str2, uint8_t strlen);
 ;
 m8_namecmp:
     ld hl, 0x0002               ; prepare hl to extract argument on the stack
@@ -110,9 +116,7 @@ m8_nc_nequ:
 
 ; Find a file or folder in a directory block
 ;
-;     m8_blk_find(uint16_t blk_addr, uint16_t name, uint8_t strlen);
-;
-; Returns address of entry in hl, or 0x0000
+;     uint8_t* m8_blk_find(uint8_t* blk_addr, uint8_t* name, uint8_t strlen);
 ;
 m8_blk_find:
     ld hl, 0x0002               ; prepare hl to extract argument on the stack
@@ -159,7 +163,7 @@ m8_bf_found:
 
 ; Find a file entry from a chained block id
 ;
-;     m8_blkc_find(uint8_t blockid, uint16_t name, uint8_t strlen);
+;     uint8_t* m8_blkc_find(uint8_t blockid, uint8_t* name, uint8_t strlen);
 ;
 m8_blkc_find:
     ld hl, 0x0002               ; prepare hl to extract argument on the stack
@@ -226,7 +230,7 @@ m8_bcf_found:
 
 ; Find a file/dir entry for a path (null terminated), from a starting block id
 ;
-;     m8_path_find(uint8_t blockid, uint16_t path);
+;     uint8_t* m8_path_find(uint8_t blockid, uint8_t* path);
 ;
 m8_path_find:
     ld hl, 0x0002               ; prepare hl to extract argument on the stack
@@ -298,7 +302,51 @@ m8_pf_ffound:
     pop de                      ; discard arg
     ret
 m8_pf_notfound:
-    pop hl                      ; discard hl
-    pop hl                      ; discard hl
+    pop hl                      ; discard arg
+    pop hl                      ; discard arg
     ld hl, 0x0000               ; not found
     ret
+
+; Find a chunk of X consecutive free blocks
+;
+;     uint8_t m8_find_cons_blocks(uint8_t nrblocks);
+;
+m8_find_cons_blocks:
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
+    add hl, sp                  ; skip over return address on stack
+    ; load nrblocks
+    ld b, (hl)                  ; load nrblocks
+    ld c, 0x00                  ; start of block chain
+    ld d, c                     ; set d to block start
+    ld hl, m8_base              ; set block table base
+m8_fcb_loop:
+    push bc                     ; save nrblocks
+    ld a, (hl)                  ; load block usage
+    or a                        ; test for zero
+    jp nz, m8_fcb_adv           ; block in use
+    dec b                       ; decrement nrblocks
+    jp z, m8_fcb_found          ; found b consecutive blocks
+m8_fcb_adv:
+    pop bc                      ; restore nrblocks
+    inc hl                      ; increment over block usage
+    inc hl                      ; increment over block link
+    inc d                       ; increment block count
+    ld c, d                     ; set block start to current pos
+    jp m8_fcb_loop              ; loop to keep looking
+m8_fcb_found:
+    pop bc
+    ld h, 0x00                  ; zero U
+    ld l, c                     ; return start block location
+    ret
+
+; * Append a new file into a directory block given a starting directory block id.
+;  * Get the last block in a chain
+;  * Add a new file to a block
+; * Delete a file from a directory block.
+; * Given a block id of a chain of blocks, unlink them all and mark blocks as free.
+; * Given a gap in a directory block, shift all files up one.
+; * Move a file from one directory block to another.
+; * Check a directory block for emptyness and free it.
+; * Shift a block from one place to another.
+
+
