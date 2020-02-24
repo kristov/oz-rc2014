@@ -231,54 +231,24 @@ test_loop:
 >RESET
 >CODE
 main:
-    ld hl, 0x0400
-    ld b, 0x10
-test_loop:
-    ld (hl), 0xff
-    inc hl
-    djnz test_loop
-
-    ld (hl), 0x68
-    inc hl
-    ld (hl), 0x65
-    inc hl
-    ld (hl), 0x6c
-    inc hl
-    ld (hl), 0x6f
-    inc hl
-    ld (hl), 0x00
-    inc hl
-    ld (hl), 0x00
-    inc hl
-    ld (hl), 0xff
-    inc hl
-    ld (hl), 0xff
-    inc hl
-
-    ld hl, 0x0500
-    ld (hl), 0x68
-    inc hl
-    ld (hl), 0x65
-    inc hl
-    ld (hl), 0x6c
-    inc hl
-    ld (hl), 0x6f
-    inc hl
-    ld (hl), 0x00
-    inc hl
-    ld (hl), 0x00
-
-    ld hl, 0x0400
+    ld hl, 0x600
     push hl
-    ld hl, 0x0500
+
+    ld hl, test_text
     push hl
+
     ld c, 0x04
     push bc
     call m8_blk_find
 
 >INCLUDE "../06-mini8fs.asm"
+>CODE
+test_text:
+    defb "prog"
+seek 0x0400
+incbin "fsimg.bin"
 >RUN
->REG HL 0x0410 "found third entry correctly"
+>REG HL 0x0608 "found second prog entry in root dir"
 
 
 >RESET
