@@ -327,11 +327,13 @@ m8_fcb_loop:
     dec b                       ; decrement nrblocks
     jp z, m8_fcb_found          ; found b consecutive blocks
     inc e                       ; increment block start
+    jp z, m8_fcb_empty          ; no more blocks left
     inc hl                      ; increment over block usage
     inc hl                      ; increment over block link
     jp m8_fcb_loop              ; loop to keep looking
 m8_fcb_adv:
     inc e                       ; increment block start
+    jp z, m8_fcb_empty          ; no more blocks left
     inc hl                      ; increment over block usage
     inc hl                      ; increment over block link
     ld b, d                     ; restore original counter
@@ -340,6 +342,10 @@ m8_fcb_adv:
 m8_fcb_found:
     ld h, 0x00                  ; zero U
     ld l, c                     ; return start block location
+    ret
+m8_fcb_empty:
+    ld h, 0x00                  ; zero U
+    ld l, 0x00                  ; zero L
     ret
 
 ; * Append a new file into a directory block given a starting directory block id.

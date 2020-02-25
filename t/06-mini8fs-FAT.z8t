@@ -261,3 +261,17 @@ seek 0x0400
 incbin "fsimg.bin"
 >RUN
 >REG HL 0x0009 "block 9 is first empty block"
+
+
+>RESET
+>CODE
+main:
+    ld c, 0xfd
+    push bc
+    call m8_find_cons_blks
+>INCLUDE "../06-mini8fs.asm"
+>CODE
+seek 0x0400
+incbin "fsimg.bin"
+>RUN
+>REG HL 0x0000 "test overflow of block bigger than possible"
