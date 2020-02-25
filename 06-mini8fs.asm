@@ -309,9 +309,9 @@ m8_pf_notfound:
 
 ; Find a chunk of X consecutive free blocks
 ;
-;     uint8_t m8_find_cons_blocks(uint8_t nrblocks);
+;     uint8_t m8_find_cons_blks(uint8_t nrblocks);
 ;
-m8_find_cons_blocks:
+m8_find_cons_blks:
     ld hl, 0x0002               ; prepare hl to extract argument on the stack
     add hl, sp                  ; skip over return address on stack
     ; load nrblocks
