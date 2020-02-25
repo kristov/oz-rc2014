@@ -344,15 +344,46 @@ m8_fcb_found:
     ld l, c                     ; return start block location
     ret
 m8_fcb_empty:
-    ld h, 0x00                  ; zero U
-    ld l, 0x00                  ; zero L
+    ld hl, 0x0000               ; block zero reserved - invalid
     ret
 
-; Link a chunk of X consecutive blocks together
+; Find and link a chunk of X consecutive blocks together
 ;
-;     uint8_t m8_link_cons_blks(uint8_t nrblocks);
+;     uint8_t* m8_link_cons_blks(uint8_t nrblocks);
 ;
 m8_link_cons_blks:
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
+    add hl, sp                  ; skip over return address on stack
+    ; load nrblocks
+    ld b, (hl)                  ; load nrblocks
+    push bc                     ; push arg
+    call m8_find_cons_blks      ; find free blocks
+    pop bc                      ; restore nrblocks
+    ld a, 0x00                  ; prepare to test l
+    or l                        ; see if we found blocks
+    jp z, m8_lcb_empty          ; no free blocks
+    ld c, l                     ; save blockid
+    push bc                     ; save blockid and nrblocks
+    push hl                     ; push arg
+    call m8_blk_addr            ; get block start address
+    pop de                      ; discard arg
+    pop bc                      ; restore blockid and nrblocks
+    push hl                     ; save starting block address
+m8_lcb_next:
+    ld (hl), 0x01               ; set to in-use
+    dec b                       ; decrement nrblocks
+    jp z, m8_lcb_done           ; finished writing blocks
+    inc c                       ; next block id
+    inc hl                      ; move to block link
+    ld (hl), c                  ; save next block link
+    inc hl                      ; move to block status
+    jp m8_lcb_next              ; keep writing blocks
+m8_lcb_done:
+    pop hl                      ; restore starting block address
+    ret
+m8_lcb_empty:
+    ld hl, 0x0000               ; invalid block address
+    ret
 
 ; * Append a new file into a directory block given a starting directory block id.
 ;  * Get the last block in a chain
