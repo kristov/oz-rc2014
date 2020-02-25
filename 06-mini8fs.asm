@@ -348,6 +348,12 @@ m8_fcb_empty:
     ld l, 0x00                  ; zero L
     ret
 
+; Link a chunk of X consecutive blocks together
+;
+;     uint8_t m8_link_cons_blks(uint8_t nrblocks);
+;
+m8_link_cons_blks:
+
 ; * Append a new file into a directory block given a starting directory block id.
 ;  * Get the last block in a chain
 ;  * Add a new file to a block
