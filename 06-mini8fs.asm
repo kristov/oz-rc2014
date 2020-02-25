@@ -317,24 +317,27 @@ m8_find_cons_blks:
     ; load nrblocks
     ld b, (hl)                  ; load nrblocks
     ld c, 0x00                  ; start of block chain
-    ld d, c                     ; set d to block start
+    ld d, b
+    ld e, c
     ld hl, m8_base              ; set block table base
 m8_fcb_loop:
-    push bc                     ; save nrblocks
     ld a, (hl)                  ; load block usage
     or a                        ; test for zero
     jp nz, m8_fcb_adv           ; block in use
     dec b                       ; decrement nrblocks
     jp z, m8_fcb_found          ; found b consecutive blocks
-m8_fcb_adv:
-    pop bc                      ; restore nrblocks
+    inc e                       ; increment block start
     inc hl                      ; increment over block usage
     inc hl                      ; increment over block link
-    inc d                       ; increment block count
-    ld c, d                     ; set block start to current pos
+    jp m8_fcb_loop              ; loop to keep looking
+m8_fcb_adv:
+    inc e                       ; increment block start
+    inc hl                      ; increment over block usage
+    inc hl                      ; increment over block link
+    ld b, d                     ; restore original counter
+    ld c, e                     ; advance block start
     jp m8_fcb_loop              ; loop to keep looking
 m8_fcb_found:
-    pop bc
     ld h, 0x00                  ; zero U
     ld l, c                     ; return start block location
     ret
