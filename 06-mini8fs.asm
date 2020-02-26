@@ -390,6 +390,75 @@ m8_lcb_empty:
     ld hl, 0x0000               ; invalid block address
     ret
 
+; Unlink (delete) a chunk of X consecutive blocks
+;
+;     m8_unlink_cons_blks(uint8_t blockid);
+;
+m8_unlink_cons_blks:
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
+    add hl, sp                  ; skip over return address on stack
+    ; load nrblocks
+    ld c, (hl)                  ; load blockid
+    ld b, 0x00                  ; count of unlinked blocks
+    ld a, 0x00                  ; set value for tests
+    ld de, m8_base              ; load block table base
+m8_ucb_nextblk:
+    ld h, 0x00                  ; zero H
+    ld l, c                     ; prepare to multiply blockid by 2
+    add hl, hl                  ; multiply
+    add hl, de                  ; add to multiplied blockid
+    ld (hl), 0x00               ; zero block in-use value
+    inc b                       ; count of unlinked blocks
+    inc hl                      ; move to next block id
+    ld c, (hl)                  ; load next block id
+    cp c                        ; test block id for zero-ness
+    jp z, m8_ucb_done           ; move to the next block
+    ld (hl), 0x00               ; zero block id
+    jp m8_ucb_nextblk           ; keep going
+m8_ucb_done:
+    ld h, 0x00                  ; zero U
+    ld l, b                     ; count of unlinked blocks
+    ret
+
+; Delete a file entry for a path (null terminated), from a starting block id
+;
+;     uint8_t m8_path_rm(uint8_t blockid, uint8_t* path);
+;
+m8_path_rm:
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
+    add hl, sp                  ; skip over return address on stack
+    ; load the path from args
+    ld e, (hl)                  ; load path L
+    inc hl                      ; skip over L
+    ld d, (hl)                  ; load path U
+    inc hl                      ; skip over H
+    ; load the blockid from args and save it
+    ld c, (hl)                  ; save block id L
+    push bc                     ; push blockid
+    push de                     ; push string
+    call m8_path_find           ; find the address of the file entry
+    pop de                      ; discard arg
+    pop bc                      ; discard arg
+    ld a, 0x00                  ; zero a
+    or l                        ; test l for non-zeroness
+    jp nz, m8_pr_found          ; if non-zero something found
+    or h                        ; test h for non-zeroness
+    jp nz, m8_pr_found          ; if non-zero something found
+    ld hl, 0xffff               ; file not found
+    ret
+m8_pr_found:
+    ld b, 0x07
+m8_pr_fnloop:
+    ld (hl), 0x00               ; zero file entry
+    inc hl                      ; go to next byte
+    djnz m8_pr_fnloop           ; erase file name
+    ld d, 0x00                  ; zero U
+    ld e, (hl)                  ; save blockid
+    push de                     ; push blockid of file
+    call m8_unlink_cons_blks    ; delete the chain of blocks
+    pop de                      ; discard arg
+    ret
+
 ; * Append a new file into a directory block given a starting directory block id.
 ;  * Get the last block in a chain
 ;  * Add a new file to a block

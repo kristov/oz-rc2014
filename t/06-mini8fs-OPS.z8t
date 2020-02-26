@@ -135,3 +135,27 @@ seek 0x0400
 incbin "fsimg.bin"
 >RUN
 >REG HL 0x06c8 "found prog/file10 chained from path"
+
+
+>RESET
+>CODE
+main:
+    ; look in block zero
+    ld c, 0x00
+    push bc
+
+    ld hl, text_text
+    push hl
+
+    call m8_path_rm
+
+>INCLUDE "../06-mini8fs.asm"
+>CODE
+text_text:
+    defb "prog/file4", 0x00
+seek 0x0400
+incbin "fsimg.bin"
+>RUN
+>REG HL 0x0004 "4 blocks unlinked"
+>MEM 0x0420 "removed prog/file4 from path"
+0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00

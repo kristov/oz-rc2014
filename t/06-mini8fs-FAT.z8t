@@ -292,3 +292,18 @@ incbin "fsimg.bin"
 >MEM 0x040e "blocks written correctly"
 0x01 0x08 0x01 0x00
 
+
+>RESET
+>CODE
+main:
+    ld c, 0x02
+    push bc
+    call m8_unlink_cons_blks
+>INCLUDE "../06-mini8fs.asm"
+>CODE
+seek 0x0400
+incbin "fsimg.bin"
+>RUN
+>REG HL 0x0002 "correct number of blocks unlinked"
+>MEM 0x0400 "blocks unlinked correctly"
+0x01 0x00 0x01 0x00 0x00 0x00 0x00 0x00 0x01 0x00
