@@ -288,7 +288,7 @@ main:
 seek 0x0400
 incbin "fsimg.bin"
 >RUN
->REG HL 0x0007 "block 6 is first empty block"
+>REG HL 0x07c0 "correct address of block list start"
 >MEM 0x040e "blocks written correctly"
 0x01 0x08 0x01 0x00
 

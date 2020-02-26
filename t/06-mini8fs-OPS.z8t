@@ -44,7 +44,7 @@ text_text:
 seek 0x0400
 incbin "fsimg.bin"
 >RUN
->REG HL 0x0608 "found second last entry in root dir"
+>REG HL 0x0638 "found last entry in root dir"
 
 
 >RESET

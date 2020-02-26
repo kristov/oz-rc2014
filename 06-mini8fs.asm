@@ -369,6 +369,11 @@ m8_link_cons_blks:
     pop de                      ; discard arg
     pop bc                      ; restore blockid and nrblocks
     push hl                     ; save starting block address
+    ld h, 0x00                  ; zero H
+    ld l, c                     ; prepare to multiply blockid by 2
+    add hl, hl                  ; multiply
+    ld de, m8_base              ; load block table base
+    add hl, de                  ; add to multiplied blockid
 m8_lcb_next:
     ld (hl), 0x01               ; set to in-use
     dec b                       ; decrement nrblocks
