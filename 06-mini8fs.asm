@@ -307,6 +307,72 @@ m8_pf_notfound:
     ld hl, 0x0000               ; not found
     ret
 
+; From a directory blockid, call callback on each file
+;
+;     uint8_t* m8_blkc_walk(uint8_t blockid, uint16_t callback);
+;
+m8_blkc_walk:
+    ld hl, 0x0002               ; prepare hl to extract argument on the stack
+    add hl, sp                  ; skip over return address on stack
+    ; load the path from args
+    ld e, (hl)                  ; load callback L
+    inc hl                      ; skip over L
+    ld d, (hl)                  ; load callback U
+    inc hl                      ; skip over U
+    ld c, (hl)                  ; blockid
+m8_bw_blk_next:
+    ld b, m8_files_per_block    ; file counter
+    push bc                     ; save counter
+    ld h, 0x00                  ; zero U
+    ld l, c                     ; set blockid
+    add hl, hl                  ; x2
+    add hl, hl                  ; x4
+    add hl, hl                  ; x8
+    add hl, hl                  ; x16
+    add hl, hl                  ; x32
+    add hl, hl                  ; x64
+    ld bc, m8_base              ; load base address
+    add hl, bc                  ; add block table offset
+    ld bc, m8_block_table_size  ; set block table size
+    add hl, bc                  ; add block table offset
+    pop bc                      ; restore bc
+    ; hl is now the address of the block
+m8_bw_blk_loop:
+    push de                     ; save callback address
+    push bc                     ; save counter
+    push hl                     ; push address of file entry
+    push m8_bw_cbret            ; push return from callback
+    push de                     ; push callback
+    ret                         ; "returns" to the callback address
+m8_bw_cbret:
+    ; check return hl from callback function
+    ld a, 0x00                  ; zero a
+    or l                        ; test l for non-zeroness
+    jp nz, m8_bw_nz             ; if non-zero end loop
+    or h                        ; test h for non-zeroness
+    jp nz, m8_bw_nz             ; if non-zero end loop
+    ; advance file entry pointer
+    pop hl                      ; restore file entry address
+    pop bc                      ; restore counter
+    ; increment pointer by file entry length
+    ld de, m8_file_entry_len    ; prepare to add file entry length
+    add hl, de                  ; move to next file entry
+    pop de                      ; restore callback address
+    djnz m8_pw_blk_loop         ; move to next file in block
+    ; find next block in chain
+    ld h, 0x00                  ; zero H
+    ld l, c                     ; set block id
+    add hl, hl                  ; block table entries two bytes
+    ld de, m8_base              ; set the block table addr
+    add hl, de                  ; hl is now the block table byte
+    inc hl                      ; skip to next block val
+    ld a, 0x00                  ; zero accumulator
+    ld c, (hl)                  ; load next blockid
+    or c                        ; test for zeroness
+    jp nz, m8_bw_          ; compute the next block
+m8_bw_nz:
+    ret
+
 ; Find a chunk of X consecutive free blocks
 ;
 ;     uint8_t m8_find_cons_blks(uint8_t nrblocks);
