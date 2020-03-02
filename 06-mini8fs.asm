@@ -341,7 +341,8 @@ m8_bw_blk_loop:
     push de                     ; save callback address
     push bc                     ; save counter
     push hl                     ; push address of file entry
-    push m8_bw_cbret            ; push return from callback
+    ld hl, m8_bw_cbret          ; prepare to push the return
+    push hl                     ; push return from callback
     push de                     ; push callback
     ret                         ; "returns" to the callback address
 m8_bw_cbret:
@@ -358,18 +359,19 @@ m8_bw_cbret:
     ld de, m8_file_entry_len    ; prepare to add file entry length
     add hl, de                  ; move to next file entry
     pop de                      ; restore callback address
-    djnz m8_pw_blk_loop         ; move to next file in block
+    djnz m8_bw_blk_loop         ; move to next file in block
     ; find next block in chain
     ld h, 0x00                  ; zero H
     ld l, c                     ; set block id
     add hl, hl                  ; block table entries two bytes
-    ld de, m8_base              ; set the block table addr
-    add hl, de                  ; hl is now the block table byte
+    ld bc, m8_base              ; set the block table addr
+    add hl, bc                  ; hl is now the block table byte
     inc hl                      ; skip to next block val
     ld a, 0x00                  ; zero accumulator
     ld c, (hl)                  ; load next blockid
     or c                        ; test for zeroness
-    jp nz, m8_bw_          ; compute the next block
+    jp nz, m8_bw_blk_next       ; compute the next block
+    ld hl, 0x0000
 m8_bw_nz:
     ret
 
