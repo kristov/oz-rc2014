@@ -64,7 +64,8 @@ m8_blk_addr:
     add hl, sp                  ; skip over return address on stack
     ld l, (hl)                  ; load the block id L
     ld h, 0x00                  ; zero U
-    or l                        ; test for zero
+    ld a, 0x00                  ; prepare for test
+    cp l                        ; test for zero
     jp z, m8_ba_skip            ; skip multiplying zero
     add hl, hl                  ; x2
     add hl, hl                  ; x4
@@ -197,9 +198,9 @@ m8_bcf_checkblock:
     pop bc                      ; restore bc
     ; check if the block address was found
     ld a, 0x00                  ; zero a
-    or l                        ; test l for non-zeroness
+    cp l                        ; test l for non-zeroness
     jp nz, m8_bcf_found         ; if non-zero something found
-    or h                        ; test h for non-zeroness
+    cp h                        ; test h for non-zeroness
     jp nz, m8_bcf_found         ; if non-zero something found
     ; get the next block id in the chain
     ld e, b                     ; set L of de to block id in b
@@ -209,7 +210,7 @@ m8_bcf_checkblock:
     pop de                      ; discard de
     ; check for the next chained block returned in l
     ld a, 0x00                  ; zero a
-    or l                        ; check for zero block id
+    cp l                        ; check for zero block id
     jp z, m8_bcf_retnull        ; no next block found
     ; get the address of the next block
     push hl                     ; push block id arg
@@ -263,9 +264,10 @@ m8_pf_sepfound:
     call m8_blkc_find           ; find the path part
     pop bc                      ; restore c
     pop de                      ; restore string location
-    or l                        ; test l for non-zeroness
+    ld a, 0x00                  ; prepare for test
+    cp l                        ; test l for non-zeroness
     jp nz, m8_pf_pfound         ; if non-zero something found
-    or h                        ; test h for non-zeroness
+    cp h                        ; test h for non-zeroness
     jp nz, m8_pf_pfound         ; if non-zero something found
     jp m8_pf_notfound           ; not found
 m8_pf_pfound:
@@ -292,9 +294,10 @@ m8_pf_lstfound:
     call m8_blkc_find           ; find the path part
     pop bc                      ; restore c
     pop de                      ; restore string location
-    or l                        ; test l for non-zeroness
+    ld a, 0x00                  ; prepare for test
+    cp l                        ; test l for non-zeroness
     jp nz, m8_pf_ffound         ; if non-zero something found
-    or h                        ; test h for non-zeroness
+    cp h                        ; test h for non-zeroness
     jp nz, m8_pf_ffound         ; if non-zero something found
     jp m8_pf_notfound           ; not found
 m8_pf_ffound:
@@ -348,9 +351,9 @@ m8_bw_blk_loop:
 m8_bw_cbret:
     ; check return hl from callback function
     ld a, 0x00                  ; zero a
-    or l                        ; test l for non-zeroness
+    cp l                        ; test l for non-zeroness
     jp nz, m8_bw_nz             ; if non-zero end loop
-    or h                        ; test h for non-zeroness
+    cp h                        ; test h for non-zeroness
     jp nz, m8_bw_nz             ; if non-zero end loop
     ; advance file entry pointer
     pop hl                      ; restore file entry address
@@ -428,7 +431,7 @@ m8_link_cons_blks:
     call m8_find_cons_blks      ; find free blocks
     pop bc                      ; restore nrblocks
     ld a, 0x00                  ; prepare to test l
-    or l                        ; see if we found blocks
+    cp l                        ; see if we found blocks
     jp z, m8_lcb_empty          ; no free blocks
     ld c, l                     ; save blockid
     push bc                     ; save blockid and nrblocks
@@ -508,9 +511,9 @@ m8_path_rm:
     pop de                      ; discard arg
     pop bc                      ; discard arg
     ld a, 0x00                  ; zero a
-    or l                        ; test l for non-zeroness
+    cp l                        ; test l for non-zeroness
     jp nz, m8_pr_found          ; if non-zero something found
-    or h                        ; test h for non-zeroness
+    cp h                        ; test h for non-zeroness
     jp nz, m8_pr_found          ; if non-zero something found
     ld hl, 0xffff               ; file not found
     ret
@@ -527,14 +530,19 @@ m8_pr_fnloop:
     pop de                      ; discard arg
     ret
 
-; * Append a new file into a directory block given a starting directory block id.
-;  * Get the last block in a chain
-;  * Add a new file to a block
-; * Delete a file from a directory block.
-; * Given a block id of a chain of blocks, unlink them all and mark blocks as free.
-; * Given a gap in a directory block, shift all files up one.
-; * Move a file from one directory block to another.
-; * Check a directory block for emptyness and free it.
-; * Shift a block from one place to another.
+; Create a new file for a path (null terminated), from a starting block id
+;
+;     uint8_t m8_file_new(uint8_t blockid, uint8_t* path);
+;
+m8_file_new:
+    ; get file size
+    ; look up 
 
-
+; Public API
+;
+; * Find a file by path and return record (m8_path_find)
+; * Delete a file and free associated blocks (m8_path_rm)
+; * Delete a directory if empty
+; * List the contents of a directory by path
+; * Create a new directory
+; * Create a new file
