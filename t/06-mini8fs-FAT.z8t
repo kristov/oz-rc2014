@@ -62,60 +62,6 @@ main:
 
 >RESET
 >CODE
-main:
-    ld hl, test_text1
-    push hl
-
-    ld hl, test_text2
-    push hl
-
-    ld c, 0x04
-    push bc
-
-    call m8_namecmp
-    pop de
-    pop de
-    pop de
-
->INCLUDE "../06-mini8fs.asm"
->CODE
-test_text1:
-    defb "helo", 0x00
-test_text2:
-    defb "helo", 0x00
->RUN
->REG HL 0x0000 "text equals"
-
-
->RESET
->CODE
-main:
-    ld hl, test_text1
-    push hl
-
-    ld hl, test_text2
-    push hl
-
-    ld c, 0x04
-    push bc
-
-    call m8_namecmp
-    pop de
-    pop de
-    pop de
-
->INCLUDE "../06-mini8fs.asm"
->CODE
-test_text1:
-    defb "helo", 0x00
-test_text2:
-    defb "lheo", 0x00
->RUN
->REG HL 0xffff "text does not equal"
-
-
->RESET
->CODE
     ld hl, 0x600
     push hl
 

@@ -81,40 +81,6 @@ m8_ba_skip:
     add hl, de                  ; add multiplied offset
     ret
 
-; Compare a file name with another
-;
-;     uint8_t m8_namecmp(uint8_t* str1, uint8_t* str2, uint8_t strlen);
-;
-m8_namecmp:
-    ld hl, 0x0002               ; prepare hl to extract argument on the stack
-    add hl, sp                  ; skip over return address on stack
-    ld b, (hl)                  ; load the strlen
-    inc hl                      ; skip over L
-    inc hl                      ; skip over U
-    ld e, (hl)                  ; load the str2 L
-    inc hl                      ; skip over L
-    ld d, (hl)                  ; load the str2 U
-    inc hl                      ; skip over H
-    push de                     ; save str2
-    ld e, (hl)                  ; load the str1 L
-    inc hl                      ; skip over L
-    ld d, (hl)                  ; load the str1 U
-    inc hl                      ; skip over H
-    ex de, hl                   ; hl is str1
-    pop de                      ; restore de
-m8_nc_loop:
-    ld a, (de)                  ; load char from str2
-    cp (hl)                     ; compare a with 
-    jp nz, m8_nc_nequ           ; not equal
-    inc hl                      ; advance str1
-    inc de                      ; advance str2
-    djnz m8_nc_loop             ; keep looking
-    ld hl, 0x0000               ; string match
-    ret
-m8_nc_nequ:
-    ld hl, 0xffff               ; not equal
-    ret
-
 ; Find a file entry from a chained block id
 ;
 ;     uint8_t* m8_blkc_find(uint8_t blockid, uint8_t* name, uint8_t strlen);
@@ -147,16 +113,20 @@ m8_bcf_nextb:
 m8_bcf_nextf:
     ; search for the file name in the current block
     ld b, m8_files_per_block    ; load the number of files per block
-    push de                     ; push the desired name pointer
-    push hl                     ; push file entry name from dir
-    push bc                     ; push strlen in c (count in b)
-    call m8_namecmp             ; compare names
+    push de                     ; save the desired name pointer
+    push hl                     ; save file entry name from dir
+    push bc                     ; save strlen in c (count in b)
+    ld b, c                     ; set counter to strlen
+m8_bcf_nc_loop:
+    ld a, (de)                  ; load char from str2
+    cp (hl)                     ; compare a with char at str1
+    jp nz, m8_bcf_nc_nequ       ; not equal
+    inc hl                      ; advance str1
+    inc de                      ; advance str2
+    djnz m8_bcf_nc_loop         ; keep looking
+    jp m8_bcf_found             ; name matched!
+m8_bcf_nc_nequ:
     pop bc                      ; pop strlen and count
-    ; check return code and jump if found
-    ld a, 0x00                  ; prepare to test l
-    cp l                        ; test for zero
-    jp z, m8_bcf_found          ; name matched!
-    ; move hl forward and go to next entry
     pop hl                      ; restore file entry name from dir
     ld d, 0x00                  ; zero high byte
     ld e, m8_file_entry_len     ; file entry length
@@ -184,6 +154,7 @@ m8_bcf_nextf:
     pop de                      ; restore the desired name pointer
     jp m8_bcf_nextb             ; check the next block
 m8_bcf_found:
+    pop bc                      ; restore the blockid
     pop hl                      ; restore file entry address
     pop de                      ; discard name pointer
     pop bc                      ; discard saved blockid
