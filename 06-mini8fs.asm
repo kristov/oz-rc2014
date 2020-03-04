@@ -116,6 +116,7 @@ m8_bcf_nextf:
     push de                     ; save the desired name pointer
     push hl                     ; save file entry name from dir
     push bc                     ; save strlen in c (count in b)
+    ; test the file name
     ld b, c                     ; set counter to strlen
 m8_bcf_nc_loop:
     ld a, (de)                  ; load char from str2
