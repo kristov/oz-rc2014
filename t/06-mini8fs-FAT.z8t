@@ -118,7 +118,7 @@ test_text2:
 
     ld c, 0x04
     push bc
-    call m8_blk_find
+    call m8_blkc_find
 
 >INCLUDE "../06-mini8fs.asm"
 >CODE
@@ -141,7 +141,7 @@ main:
 
     ld c, 0x04
     push bc
-    call m8_blk_find
+    call m8_blkc_find
 
 >INCLUDE "../06-mini8fs.asm"
 >CODE
@@ -169,6 +169,7 @@ main:
 >INCLUDE "../06-mini8fs.asm"
 >RUN
 >REG HL 0x0002 "found block id 2"
+
 
 >RESET
 >CODE

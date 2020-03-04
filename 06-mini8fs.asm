@@ -115,53 +115,6 @@ m8_nc_nequ:
     ld hl, 0xffff               ; not equal
     ret
 
-; Find a file or folder in a directory block
-;
-;     uint8_t* m8_blk_find(uint8_t* blk_addr, uint8_t* name, uint8_t strlen);
-;
-m8_blk_find:
-    ld hl, 0x0002               ; prepare hl to extract argument on the stack
-    add hl, sp                  ; skip over return address on stack
-    ld c, (hl)                  ; load strlen
-    inc hl                      ; skip over L
-    inc hl                      ; skip over H
-    ; load the desired file name from args
-    ld e, (hl)                  ; load the name L
-    inc hl                      ; skip over L
-    ld d, (hl)                  ; load the name U
-    push de                     ; save the name pointer
-    inc hl                      ; skip over H
-    ; load the block address from args
-    ld e, (hl)                  ; load block address L
-    inc hl                      ; skip over L
-    ld d, (hl)                  ; load block address U
-    ex de, hl                   ; hl is the block address
-    pop de                      ; restore the name pointer
-    ld b, m8_files_per_block    ; load the number of files per block
-m8_bf_next:
-    push de                     ; push the name pointer
-    push hl                     ; push beginning of file entry name
-    push bc                     ; push strlen in c
-    call m8_namecmp             ; compare names
-    pop bc                      ; pop arg
-    ; check return code and jump if found
-    ld a, l                     ; load low byte of return code
-    or a                        ; test for zero
-    jp z, m8_bf_found           ; name matched
-    ; move hl forward and go to next entry
-    pop hl                      ; restore file entry address
-    ld d, 0x00                  ; zero high byte
-    ld e, m8_file_entry_len     ; file entry length
-    add hl, de                  ; advance to next file entry
-    pop de                      ; restore the name pointer
-    djnz m8_bf_next             ; look for next file
-    ld hl, 0x0000               ; not found
-    ret
-m8_bf_found:
-    pop hl                      ; restore file entry address
-    pop de                      ; restore the name pointer
-    ret
-
 ; Find a file entry from a chained block id
 ;
 ;     uint8_t* m8_blkc_find(uint8_t blockid, uint8_t* name, uint8_t strlen);
@@ -170,7 +123,7 @@ m8_blkc_find:
     ld hl, 0x0002               ; prepare hl to extract argument on the stack
     add hl, sp                  ; skip over return address on stack
     ; load the strlen
-    ld c, (hl)                  ; load strlen
+    ld b, (hl)                  ; load strlen
     inc hl                      ; skip over L
     inc hl                      ; skip over H
     ; load the desired file name from args
@@ -178,55 +131,67 @@ m8_blkc_find:
     inc hl                      ; skip over L
     ld d, (hl)                  ; load the name U
     inc hl                      ; skip over H
-    push de                     ; save name addr
-    ; load the block id from args and save it
-    ld e, (hl)                  ; load block id L
-    ld d, c                     ; save strlen
-    push de                     ; push block id arg
-    call m8_blk_addr            ; convert block id into block addr
-    pop de                      ; remove id from stack
-    ld b, e                     ; save block id
-    ld c, d                     ; restore strlen
-    ex de, hl                   ; de block address, hl block id
-    pop hl                      ; restore name address
-m8_bcf_checkblock:
+    ; load the blockid from args and save it
+    ld c, (hl)                  ; load blockid L
+m8_bcf_nextb:
+    push de                     ; save name
+    push bc                     ; push blockid (c) and strlen arg (b)
+    call m8_blk_addr            ; convert blockid into block addr
+    pop bc                      ; restore blockid and strlen from stack
+    pop de                      ; restore name
+    ; swap the strlen and blockid
+    ld a, b                     ; store strlen in a
+    ld b, c                     ; store blockid in b
+    ld c, a                     ; store strlen in c
+    push bc                     ; save blockid (b) for later
+m8_bcf_nextf:
     ; search for the file name in the current block
-    push de                     ; push block addr
-    push hl                     ; push name addr
-    push bc                     ; push strlen in c
-    call m8_blk_find            ; find the file in this block
-    pop bc                      ; restore bc
-    ; check if the block address was found
-    ld a, 0x00                  ; zero a
-    cp l                        ; test l for non-zeroness
-    jp nz, m8_bcf_found         ; if non-zero something found
-    cp h                        ; test h for non-zeroness
-    jp nz, m8_bcf_found         ; if non-zero something found
-    ; get the next block id in the chain
-    ld e, b                     ; set L of de to block id in b
-    push bc                     ; save bc for after call
-    push de                     ; push current block id in arg
-    call m8_blk_get_next        ; get next block id in chain
+    ld b, m8_files_per_block    ; load the number of files per block
+    push de                     ; push the desired name pointer
+    push hl                     ; push file entry name from dir
+    push bc                     ; push strlen in c (count in b)
+    call m8_namecmp             ; compare names
+    pop bc                      ; pop strlen and count
+    ; check return code and jump if found
+    ld a, 0x00                  ; prepare to test l
+    cp l                        ; test for zero
+    jp z, m8_bcf_found          ; name matched!
+    ; move hl forward and go to next entry
+    pop hl                      ; restore file entry name from dir
+    ld d, 0x00                  ; zero high byte
+    ld e, m8_file_entry_len     ; file entry length
+    add hl, de                  ; advance to next file entry
+    pop de                      ; restore the name pointer
+    djnz m8_bcf_nextf           ; look for next file
+    ; move to the next block in the chain
+    pop bc                      ; restore the blockid
+    push de                     ; save the desired name pointer
+    push hl                     ; save file entry name from dir
+    ld e, b                     ; set the blockid
+    push de                     ; push current blockid in arg
+    call m8_blk_get_next        ; get next blockid in chain
     pop de                      ; discard de
     ; check for the next chained block returned in l
+    ld h, 0x00                  ; clean h
     ld a, 0x00                  ; zero a
     cp l                        ; check for zero block id
     jp z, m8_bcf_retnull        ; no next block found
-    ; get the address of the next block
-    push hl                     ; push block id arg
-    call m8_blk_addr            ; convert block id into block addr
-    pop de                      ; discard block id arg
-    pop bc                      ; restore saved strlen
-    ld b, e                     ; set block id to next one
-    pop de                      ; restore name addr
-    pop af                      ; discard old block addr
-    ex de, hl                   ; hl is name addr, de is new block addr
-    jp m8_bcf_checkblock        ; rinse and repeat
-m8_bcf_retnull:
-    ld hl, 0x0000               ; return null address
+    ; swap the strlen and blockid
+    ld a, c                     ; store strlen in a
+    ld c, l                     ; save the next blockid in c
+    ld b, a                     ; store the strlen in b
+    pop hl                      ; restore file entry name from dir
+    pop de                      ; restore the desired name pointer
+    jp m8_bcf_nextb             ; check the next block
 m8_bcf_found:
-    pop bc                      ; discard name addr
-    pop de                      ; discard block addr
+    pop hl                      ; restore file entry address
+    pop de                      ; discard name pointer
+    pop bc                      ; discard saved blockid
+    ret
+m8_bcf_retnull:
+    pop hl                      ; discard
+    pop hl                      ; discard
+    ld hl, 0x0000               ; return null
     ret
 
 ; Find a file/dir entry for a path (null terminated), from a starting block id
