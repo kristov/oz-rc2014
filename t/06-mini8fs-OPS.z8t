@@ -12,6 +12,9 @@ main:
     ld l, 0x04
     push hl
     call m8_blkc_find
+    pop de
+    pop de
+    pop de
 
 >INCLUDE "../06-mini8fs.asm"
 >CODE
@@ -36,6 +39,9 @@ main:
     ld l, 0x04
     push hl
     call m8_blkc_find
+    pop de
+    pop de
+    pop de
 
 >INCLUDE "../06-mini8fs.asm"
 >CODE
@@ -58,6 +64,8 @@ main:
     push hl
 
     call m8_path_find
+    pop de
+    pop de
 
 >INCLUDE "../06-mini8fs.asm"
 >CODE
@@ -80,6 +88,8 @@ main:
     push hl
 
     call m8_path_find
+    pop de
+    pop de
 
 >INCLUDE "../06-mini8fs.asm"
 >CODE
@@ -104,6 +114,9 @@ main:
     ld l, 0x05
     push hl
     call m8_blkc_find
+    pop de
+    pop de
+    pop de
 
 >INCLUDE "../06-mini8fs.asm"
 >CODE
@@ -126,6 +139,8 @@ main:
     push hl
 
     call m8_path_find
+    pop de
+    pop de
 
 >INCLUDE "../06-mini8fs.asm"
 >CODE
@@ -148,6 +163,8 @@ main:
     push hl
 
     call m8_path_rm
+    pop de
+    pop de
 
 >INCLUDE "../06-mini8fs.asm"
 >CODE
