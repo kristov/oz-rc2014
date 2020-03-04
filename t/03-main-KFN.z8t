@@ -8,6 +8,7 @@ main:
     push hl
 
     call kq_run_func
+    pop de
 
     halt
 

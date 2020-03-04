@@ -20,6 +20,7 @@ loop:
     push hl
 
     call rb_readm
+    pop de
 
     halt
 
@@ -53,6 +54,7 @@ loop:
     push hl
 
     call rb_readm
+    pop de
 
     halt
 
@@ -88,6 +90,7 @@ loop:
     push hl
 
     call rb_readm
+    pop de
 
     halt
 

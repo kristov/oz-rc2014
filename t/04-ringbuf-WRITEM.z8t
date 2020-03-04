@@ -25,6 +25,8 @@ main:
     push bc
 
     call rb_writem
+    pop de
+    pop de
 
     halt
 
@@ -70,6 +72,8 @@ loop:
     push bc
 
     call rb_writem
+    pop de
+    pop de
 
     halt
 
@@ -120,6 +124,8 @@ loop:
     push bc
 
     call rb_writem
+    pop de
+    pop de
 
     halt
 

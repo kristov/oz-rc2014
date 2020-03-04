@@ -7,6 +7,7 @@ main:
     ld c, 0xaf
     push bc
     call rb_writeb
+    pop de
 
     halt
 
@@ -26,10 +27,12 @@ main:
     ld c, 0xaf
     push bc
     call rb_writeb
+    pop de
 
     ld c, 0xbf
     push bc
     call rb_writeb
+    pop de
 
     halt
 
@@ -68,6 +71,7 @@ loop:
     ld c, 0xbf
     push bc
     call rb_writeb
+    pop de
 
     halt
 
@@ -110,6 +114,7 @@ loop:
     ld c, 0xbf
     push bc
     call rb_writeb
+    pop de
 
     halt
 
@@ -150,6 +155,7 @@ loop:
     ld c, 0xbf
     push bc
     call rb_writeb
+    pop de
 
     halt
 

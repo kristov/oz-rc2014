@@ -9,9 +9,6 @@ ql_base: equ kfn_caddr + 2      ; location of queue list
 kqs_tbase: equ ql_base + 2      ; location of queue status table
 
 init:
-    ; init the stack top
-    ld sp, 0x0fff
-
     ; load the location of the queue list table
     ld hl, 0x0300
     ld (ql_base), hl
