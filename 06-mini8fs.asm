@@ -1,5 +1,5 @@
 m8_base: equ 0x0400
-m8_block_table_size: equ 0x0200
+m8_block_base: equ m8_base + 0x0200
 m8_files_per_block: equ 0x08
 m8_file_entry_len: equ 0x08
 m8_file_name_len: equ 0x06
@@ -68,10 +68,7 @@ m8_blk_addr:
     add hl, hl                  ; x32
     add hl, hl                  ; x64
 m8_ba_skip:
-    ex de, hl                   ; de computed offset
-    ld hl, m8_base              ; load base address
-    ld bc, m8_block_table_size  ; set block table size
-    add hl, bc                  ; add block table offset
+    ld de, m8_block_base        ; load base address
     add hl, de                  ; add multiplied offset
     ret
 
@@ -265,9 +262,7 @@ m8_bw_blk_next:
     add hl, hl                  ; x16
     add hl, hl                  ; x32
     add hl, hl                  ; x64
-    ld bc, m8_base              ; load base address
-    add hl, bc                  ; add block table offset
-    ld bc, m8_block_table_size  ; set block table size
+    ld bc, m8_block_base        ; set block table size
     add hl, bc                  ; add block table offset
     pop bc                      ; restore bc
     ; hl is now the address of the block
