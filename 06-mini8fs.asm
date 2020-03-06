@@ -30,25 +30,6 @@ m8_bff_found:
     ld l, a
     ret
 
-; Find if there is a next block for the passed block
-;
-;     uint8_t m8_blk_get_next(uint8_t blockid);
-;
-m8_blk_get_next:
-    ld hl, 0x0002               ; prepare hl to extract argument on the stack
-    add hl, sp                  ; skip over return address on stack
-    ld b, 0x00                  ; zero id U
-    ld l, (hl)                  ; load block id
-    ld h, 0x00                  ; zero H
-    add hl, hl                  ; block table entries two bytes
-    ex de, hl                   ; free hl
-    ld hl, m8_base              ; load the block table addr
-    add hl, de                  ; hl is now the block table byte
-    inc hl                      ; skip to next block val
-    ld l, (hl)                  ; load the value
-    ld h, 0x00                  ; zero H
-    ret
-
 ; Get memory address for block id
 ;
 ;     uint8_t* m8_blk_addr(uint8_t blockid);
@@ -129,12 +110,15 @@ m8_bcf_nc_nequ:
     pop bc                      ; restore the blockid
     push de                     ; save the desired name pointer
     push hl                     ; save file entry name from dir
-    ld e, b                     ; set the blockid
-    push de                     ; push current blockid in arg
-    call m8_blk_get_next        ; get next blockid in chain
-    pop de                      ; discard de
-    ; check for the next chained block returned in l
-    ld h, 0x00                  ; clean h
+    ; find the next chained id
+    ld h, 0x00                  ; zero d
+    ld l, b                     ; set the blockid
+    add hl, hl                  ; block table entries two bytes
+    ex de, hl                   ; free hl
+    ld hl, m8_base              ; load the block table addr
+    add hl, de                  ; hl is now the block table byte
+    inc hl                      ; skip to next block val
+    ld l, (hl)                  ; load the value
     ld a, 0x00                  ; zero a
     cp l                        ; check for zero block id
     jp z, m8_bcf_retnull        ; no next block found
