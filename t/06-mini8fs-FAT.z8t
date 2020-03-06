@@ -19,8 +19,12 @@ main:
 load_loop:
     ld (hl), 0x01
     inc hl
+    ld (hl), 0x00
+    inc hl
     djnz load_loop
     ld (hl), 0x01
+    inc hl
+    ld (hl), 0x00
     call m8_blk_find_free
 
 >INCLUDE "../06-mini8fs.asm"
@@ -34,9 +38,15 @@ main:
     ld hl, m8_base
     ld (hl), 0x01
     inc hl
-    ld (hl), 0x02
+    ld (hl), 0x00
     inc hl
-    ld (hl), 0x03
+    ld (hl), 0x01
+    inc hl
+    ld (hl), 0x00
+    inc hl
+    ld (hl), 0x01
+    inc hl
+    ld (hl), 0x00
     call m8_blk_find_free
 
 >INCLUDE "../06-mini8fs.asm"
@@ -52,7 +62,13 @@ main:
     inc hl
     ld (hl), 0x00
     inc hl
+    ld (hl), 0x00
+    inc hl
+    ld (hl), 0x00
+    inc hl
     ld (hl), 0x03
+    inc hl
+    ld (hl), 0x00
     call m8_blk_find_free
 
 >INCLUDE "../06-mini8fs.asm"
