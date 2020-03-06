@@ -5,29 +5,6 @@ m8_file_entry_len: equ 0x08
 m8_file_name_len: equ 0x06
 m8_dir_separator: equ 0x2f
 
-; Find a free block in the block table
-;
-;     uint8_t m8_blk_find_free();
-;
-m8_blk_find_free:
-    ld hl, m8_base              ; start of block table
-    ld b, 0xff                  ; max nr blocks
-    ld a, 0x00                  ; for testing block status
-m8_bff_next:
-    cp (hl)                     ; test the block status byte
-    jp z, m8_bff_found          ; zero indicates free byte
-    inc hl                      ; step over status byte
-    inc hl                      ; step over chained blockid
-    djnz m8_bff_next            ; keep looking
-    ld hl, 0xffff               ; load error code
-    ret
-m8_bff_found:
-    ld a, 0xff                  ; prepare to subtract
-    sub b                       ; free id is ff - counter
-    ld h, 0x00                  ; zero H
-    ld l, a                     ; set free id
-    ret
-
 ; Get memory address for block id
 ;
 ;     uint8_t* m8_blk_addr(uint8_t blockid);
