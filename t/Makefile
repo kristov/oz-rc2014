@@ -8,7 +8,7 @@ TESTS += 04-ringbuf-READ.z8t
 TESTS += 04-ringbuf-WRITE.z8t
 TESTS += 04-ringbuf-READM.z8t
 TESTS += 04-ringbuf-WRITEM.z8t
-TESTS += 06-mini8fs-FAT.z8t
+TESTS += 06-mini8fs-BLK.z8t
 TESTS += 06-mini8fs-OPS.z8t
 
 all: $(TESTS)

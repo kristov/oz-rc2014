@@ -21,7 +21,7 @@ test_text:
 seek 0x0400
 incbin "fsimg.bin"
 >RUN
->REG HL 0x0600 "found first dev entry in root block"
+>REG HL 0x0608 "found first dev entry in root block"
 
 
 >RESET
@@ -47,7 +47,7 @@ test_text:
 seek 0x0400
 incbin "fsimg.bin"
 >RUN
->REG HL 0x0608 "found second prog entry in root block"
+>REG HL 0x0610 "found second prog entry in root block"
 
 
 >RESET
