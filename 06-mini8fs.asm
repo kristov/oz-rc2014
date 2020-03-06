@@ -45,14 +45,8 @@ m8_blk_get_next:
     ld hl, m8_base              ; load the block table addr
     add hl, de                  ; hl is now the block table byte
     inc hl                      ; skip to next block val
-    ld a, (hl)                  ; load the value
-    or a                        ; test for zero
-    jp z, m8_bgn_none           ; no further blocks
+    ld l, (hl)                  ; load the value
     ld h, 0x00                  ; zero H
-    ld l, a                     ; set next block id
-    ret
-m8_bgn_none:
-    ld hl, 0x0000               ; no blocks found
     ret
 
 ; Get memory address for block id
