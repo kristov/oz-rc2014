@@ -14,6 +14,9 @@ TESTS += 06-mini8fs-OPS.z8t
 all: $(TESTS)
 	$(Z8T) $(ASM) $(TESTS)
 
+mini8fs: 06-mini8fs-BLK.z8t 06-mini8fs-OPS.z8t
+	$(Z8T) $(ASM) 06-mini8fs-BLK.z8t 06-mini8fs-OPS.z8t
+
 06-mini8fs-OPS.z8t: fsimg.bin
 
 fsimg.bin: fsimg.hex
