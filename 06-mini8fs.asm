@@ -408,11 +408,17 @@ m8_pr_fnloop:
     ld (hl), 0x00               ; zero file entry
     inc hl                      ; go to next byte
     djnz m8_pr_fnloop           ; erase file name
+    push hl                     ; save blockid location
     ld d, 0x00                  ; zero U
     ld e, (hl)                  ; save blockid
     push de                     ; push blockid of file
     call m8_unlink_cons_blks    ; delete the chain of blocks
     pop de                      ; discard arg
+    ex de, hl                   ; save nr blocks unlinked in de
+    pop hl                      ; restore blockid location
+    ld (hl), 0x00               ; zero blockid
+    ld hl, 0x0000               ; success
+    ex de, hl                   ; return nr blocks unlinked
     ret
 
 ; Create a new file for a path (null terminated), from a starting block id
