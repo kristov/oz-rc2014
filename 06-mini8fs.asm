@@ -14,7 +14,7 @@ m8_blk_addr:
     add hl, sp                  ; skip over return address on stack
     ld l, (hl)                  ; load the block id L
     ld h, 0x00                  ; zero U
-    ld a, 0x00                  ; prepare for test
+    xor a                       ; prepare for test
     cp l                        ; test for zero
     jp z, m8_ba_skip            ; skip multiplying zero
     add hl, hl                  ; x2
@@ -94,7 +94,7 @@ m8_bcf_nc_nequ:
     add hl, de                  ; hl is now the block table byte
     inc hl                      ; skip to next block val
     ld l, (hl)                  ; load the value
-    ld a, 0x00                  ; zero a
+    xor a                       ; zero a
     cp l                        ; check for zero block id
     jp z, m8_bcf_retnull        ; no next block found
     ; swap the strlen and blockid
@@ -168,7 +168,7 @@ m8_link_cons_blks:
     push bc                     ; push arg
     call m8_find_cons_blks      ; find free blocks
     pop bc                      ; restore nrblocks
-    ld a, 0x00                  ; prepare to test l
+    xor a                       ; prepare to test l
     cp l                        ; see if we found blocks
     jp z, m8_lcb_empty          ; no free blocks
     ld c, l                     ; save blockid
@@ -209,7 +209,7 @@ m8_unlink_cons_blks:
     ; load nrblocks
     ld c, (hl)                  ; load blockid
     ld b, 0x00                  ; count of unlinked blocks
-    ld a, 0x00                  ; set value for tests
+    xor a                       ; set value for tests
     ld de, m8_base              ; load block table base
 m8_ucb_nextblk:
     ld h, 0x00                  ; zero H
@@ -264,7 +264,7 @@ m8_pf_sepfound:
     call m8_blkc_find           ; find the path part
     pop bc                      ; restore c
     pop de                      ; restore string location
-    ld a, 0x00                  ; prepare for test
+    xor a                       ; prepare for test
     cp l                        ; test l for non-zeroness
     jp nz, m8_pf_pfound         ; if non-zero something found
     cp h                        ; test h for non-zeroness
@@ -294,7 +294,7 @@ m8_pf_lstfound:
     call m8_blkc_find           ; find the path part
     pop bc                      ; restore c
     pop de                      ; restore string location
-    ld a, 0x00                  ; prepare for test
+    xor a                       ; prepare for test
     cp l                        ; test l for non-zeroness
     jp nz, m8_pf_ffound         ; if non-zero something found
     cp h                        ; test h for non-zeroness
@@ -329,7 +329,7 @@ m8_path_rm:
     call m8_path_find           ; find the address of the file entry
     pop de                      ; discard arg
     pop bc                      ; discard arg
-    ld a, 0x00                  ; zero a
+    xor a                       ; zero a
     cp l                        ; test l for non-zeroness
     jp nz, m8_pr_found          ; if non-zero something found
     cp h                        ; test h for non-zeroness
